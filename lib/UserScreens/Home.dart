@@ -337,7 +337,7 @@ class _HomeState extends State<Home> {
             children: [
               Text(
                 "₹ " + investAmount!.get("InvestAmount").toString(),
-        style: TextStyle(color: Colors.white, fontWeight:FontWeight.w900,fontSize: 15,fontFamily: "Poppins-Medium")),
+        style: TextStyle(color: Colors.white, fontWeight:FontWeight.w900,fontSize: 16,fontFamily: "Poppins-Medium")),
             ],
           );
         }
@@ -414,7 +414,7 @@ class _HomeState extends State<Home> {
     return Container(
       margin: const EdgeInsets.only(left: 12.3),
       decoration: BoxDecoration(
-        color: Colors.green.shade300,
+        color: Colors.green.shade200,
           border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(5.3)),
       child: Column(
@@ -426,7 +426,7 @@ class _HomeState extends State<Home> {
               child: const Center(
                   child: Text("Invested Amount",
                       style: TextStyle(
-                          color: Colors.deepPurple, fontWeight: FontWeight.w500))),
+                          color: Colors.deepOrange, fontWeight: FontWeight.bold,fontFamily: "Poppins-Medium"))),
               margin: const EdgeInsets.only(
                   top: 5.3, bottom: 3.3, left: 3.3, right: 5.3)),
           const SizedBox(
@@ -506,14 +506,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  build_photo(QuerySnapshot<Object?> user, int index) {
-    return ProfilePicture(
-      name: 'Aditya Dharmawan Saputra',
-      radius: 31,
-      fontsize: 14,
-      img: 'https://avatars.githubusercontent.com/u/37553901?v=4',
-    );
-  }
+
 
 
 }

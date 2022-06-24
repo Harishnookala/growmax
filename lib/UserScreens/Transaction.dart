@@ -1,4 +1,5 @@
 
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,8 @@ class _TransactionState extends State<Transaction> {
         .get();
     var requestinvestments = FirebaseFirestore.instance
         .collection("requestInvestments").snapshots();
+    var requestWithdrawls = FirebaseFirestore.instance
+        .collection("requestwithdrawls").snapshots();
     var investAmount;
     return Container(
       margin: EdgeInsets.all(16.3),
@@ -36,7 +39,7 @@ class _TransactionState extends State<Transaction> {
               alignment: Alignment.topLeft,
               margin: EdgeInsets.only(left: 5.3),
               child: const Text(
-                "Invest Amount Transaction",
+                "Transactions",
                 style: TextStyle(
                     color: Colors.pinkAccent,
                     fontWeight: FontWeight.w400,
@@ -77,7 +80,7 @@ class _TransactionState extends State<Transaction> {
                   ],
                 ),
                 Divider(color: Colors.black,),
-                   get_allinvestments(requestinvestments)
+                   get_allinvestments(requestinvestments,requestWithdrawls)
                   ],
                 ),
 
@@ -96,7 +99,7 @@ class _TransactionState extends State<Transaction> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                  "₹ " + investAmount!.get("InvestAmount").toString(),
+                  "₹ ${investAmount!.get("InvestAmount")}",
                   style: TextStyle(color: Colors.green, fontWeight:FontWeight.w900,fontSize: 15,fontFamily: "Poppins-Medium")),
             ],
           );
@@ -109,68 +112,52 @@ class _TransactionState extends State<Transaction> {
     );
   }
 
-  get_allinvestments(requestinvestments) {
+  get_allinvestments(requestinvestments,requestwithdrawls) {
     return StreamBuilder<QuerySnapshot>(
       stream: requestinvestments,
       builder: (context, snap) {
         if (snap.hasData) {
-          var userinvestments = snap.data;
-          List dates  = get_dates(userinvestments);
-          List invests = get_data(userinvestments,dates);
-          print(invests);
-          return Container(
-              margin: EdgeInsets.only(left: 12.3,right: 5.3),
-              child: ListView.builder(
-                  padding: EdgeInsets.zero,
-                physics: ScrollPhysics(),
-                  itemCount: invests.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context,index){
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 12.3),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text(invests[index][0]),
-                        Text("+ "+ invests[index][1])
-                      ],
-                    ),
-                  );
-              }),
-            );
+          List<QueryDocumentSnapshot> userinvestments = snap.data!.docs;
+         return StreamBuilder<QuerySnapshot>(
+              stream: requestwithdrawls,
+           builder: (context,snapshot){
+                if(snapshot.hasData){
+                  List transaction =[];
+                  List<QueryDocumentSnapshot>  userwithdrawls = snapshot.data!.docs;
+                  userinvestments.addAll(userwithdrawls);
+                  var data = get_check(userinvestments);
+                   return  Container(
+                     child: ListView.builder(
+                       itemCount: data.length,
+                         padding: EdgeInsets.zero,
+                         shrinkWrap: true,
+                         itemBuilder: (context,index){
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 12.3),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Container(
+                                  child: Text(data[index][0],style: TextStyle(),)),
+                              Container(
+                                  child: Text(data[index][1],style: TextStyle(fontSize: 15),))
+                            ],
+                          ),
+                        );
+                     }),
+                   );
+                }return CircularProgressIndicator();
+           },
+         );
 
         }
-        return Container();
+        return CircularProgressIndicator();
       },
     );
   }
 
-  get_data(QuerySnapshot<Object?>? userinvestments, List dates) {
-    List investments =[];
-
-    DateFormat format = DateFormat("yyyy-MM-dd");
-    for(int i =0;i<userinvestments!.docs.length;i++){
-      var createdAt = userinvestments.docs[i].get("CreatedAt");
-      var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
-
-      if(userinvestments.docs[i].get("status")=="Accept"){
-      for(int j=0;j<dates.length;j++){
-        if(userinvestments.docs[i].get("phonenumber")== phoneNumber&&dates[j].toString()==date.toString()){
-          DateTime dateTime = userinvestments.docs[i].get("CreatedAt").toDate();
-          var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
-          investments.add([datetime,userinvestments.docs[i].get("InvestAmount")]);
-          }
-        }
-      }
-    }
-
-    return investments;
-  }
-
   get_dates(QuerySnapshot<Object?>? userinvestments) {
     List dates =[];
-    List listofdates=[];
     for(int i =0;i<userinvestments!.docs.length;i++){
       if(userinvestments.docs[i].get("phonenumber")== phoneNumber){
         if(userinvestments.docs[i].get("status")=="Accept"){
@@ -180,18 +167,80 @@ class _TransactionState extends State<Transaction> {
         }
       }
     }
-    for(int i =0;i<dates.length;i++){
-      String single = dates[i];
-      listofdates.add(single.toString());
-    }
-    for(int i =0;i<listofdates.length;i++){
-      listofdates.sort((a, b) {
+    return dates;
+  }
+
+  List? get_sort(List investDates) {
+    for(int i =0;i<investDates.length;i++){
+      investDates.sort((a, b) {
         return a.compareTo(b);
       },);
     }
-    return listofdates;
+    return investDates;
+  }
+
+  get_check(List<QueryDocumentSnapshot<Object?>> userinvestments) {
+    List investments =[];
+    List dates =[];
+    var symbol;
+    for(int i =0;i<userinvestments.length;i++){
+      if(userinvestments[i].get("status")=="Accept"&&userinvestments[i].get("phonenumber")==phoneNumber) {
+        var date = DateTime.fromMicrosecondsSinceEpoch(userinvestments[i]
+            .get("CreatedAt")
+            .microsecondsSinceEpoch);
+       dates.add(date);
+      }
+      }
+    for(int i =0;i<dates.length;i++){
+      dates.sort((a, b) {
+        return a.compareTo(b);
+      },);
+    }
+
+    for(int i =0;i<userinvestments.length;i++){
+      var createdAt = userinvestments[i].get("CreatedAt");
+      var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
+      for(int j =0;j<dates.length;j++){
+        if(userinvestments[i].get("phonenumber")== phoneNumber&&dates[j].toString()==date.toString()){
+          DateTime dateTime = userinvestments[i].get("CreatedAt").toDate();
+          var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
+          if(userinvestments[i].get("Type")=="Credit"){
+            symbol ="+";
+          }
+          if(userinvestments[i].get("Type")=="Debit"){
+            symbol ="-";
+          }
+          investments.add([datetime,"$symbol "+ userinvestments[i].get("InvestAmount")]);
+
+        }
+      }
+    }
+    return investments;
   }
 
 
 
+  get_data(QuerySnapshot<Object?>? userinvestments, List dates) {
+    List investments =[];
+
+    for(int i =0;i<userinvestments!.docs.length;i++){
+      var createdAt = userinvestments.docs[i].get("CreatedAt");
+      var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
+
+      if(userinvestments.docs[i].get("status")=="Accept"){
+        for(int j=0;j<dates.length;j++){
+          if(userinvestments.docs[i].get("phonenumber")== phoneNumber&&dates[j].toString()==date.toString()){
+            DateTime dateTime = userinvestments.docs[i].get("CreatedAt").toDate();
+            var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
+            investments.add([datetime,userinvestments.docs[i].get("InvestAmount")]);
+          }
+        }
+      }
+    }
+
+    return investments;
+  }
+
 }
+
+
