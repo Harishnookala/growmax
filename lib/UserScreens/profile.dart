@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 class Profile extends StatefulWidget {
   String?phoneNumber;
@@ -12,6 +13,10 @@ class _ProfileState extends State<Profile> {
   _ProfileState({this.phoneNumber});
   @override
   Widget build(BuildContext context) {
+    var users = FirebaseFirestore.instance
+        .collection("Users")
+        .doc(phoneNumber)
+        .get();
     return Container(
       margin: EdgeInsets.all(16.3),
       child: Column(
@@ -28,82 +33,106 @@ class _ProfileState extends State<Profile> {
             children: [
               Container(
                 margin: const EdgeInsets.only(left: 16.3,right: 16.3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Name:- "),
-
-                    Text("Harish")
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              SizedBox(height: 20,),
-              Container(
-                margin: const EdgeInsets.only(left: 16.3,right: 16.3),
                 child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children:const [
-                        Text("Mobile Number:-"),
-                        Text("7995289160")
-                      ],
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              SizedBox(height: 20,),
-              Container(
-                margin: const EdgeInsets.only(left: 16.3,right: 15.3),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children:  [
-                    Text("Email:-"),
-                    SizedBox(
+                    FutureBuilder<DocumentSnapshot>(
+                      future: users,
+                      builder: (context,snap){
+                        if(snap.hasData){
+                          var users = snap.data;
+                          return Column(
+                            children: [
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Name :-"),
+                                    Text(users!.get("firstname"))
+                                  ],
+                                ),
+                                margin: EdgeInsets.only(bottom: 8.3),
+                              ),
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                        child: Text("nookalasaiharish@gmail.com"))
-                  ],
-                ),
-              ),
-            ],
-          ),
+                                  children: [
+                                    Text("Gender:-"),
+                                    Text(users.get("gender"))
+                                  ],
+                                ),
+                                margin: EdgeInsets.only(bottom: 8.3),
+                              ),
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-          Column(
-            children: [
-              SizedBox(height: 20,),
-              Container(
-                margin: const EdgeInsets.only(bottom: 16.3,left: 16.3,right: 16.3),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Address:- "),
+                                  children: [
+                                    Text("Mobilenumber:-"),
+                                    Text(users.get("mobilenumber"))
+                                  ],
+                                ),
+                        margin: EdgeInsets.only(bottom: 8.3),
+                              ),
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
 
-                        Container(
-                            width: 180,
-                            child: Text("Survey No. 746, Mungamur Road, Kadanuthala - 524 142, Bogole (Mandal) Nellore (Dist), Andhra Pradesh, India"))
-                      ],
+                                  children: [
+                                    Text("Email:-"),
+                                    Container(
+                                        child: Text(users.get("email")),
+                                    )
+                                  ],
+                                ),
+                                margin: EdgeInsets.only(bottom: 8.3),
+
+                              ),
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                  children: [
+                                    Text("Dateofbirth:-"),
+                                    Text(users.get("dateofbirth"))
+                                  ],
+                                ),
+                                margin: EdgeInsets.only(bottom: 8.3),
+
+                              ),
+                              Container(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                  children: [
+                                    Text("Address:-"),
+                                    Container(
+                                        width:160,
+                                        child: Text(users.get("address")))
+                                  ],
+                                ),
+                                margin: EdgeInsets.only(bottom: 16.3),
+
+                              ),
+                              Center(child: TextButton(
+                                  style: TextButton.styleFrom(
+                                      minimumSize: Size(120, 20),
+                                      backgroundColor: Colors.greenAccent.shade200,shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.3))),
+                                  onPressed: (){},child: Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15),)),)
+                            ],
+                          );
+                        }return CircularProgressIndicator();
+                      },
                     )
                   ],
                 ),
               ),
             ],
           ),
-           Center(child: TextButton(
-               style: TextButton.styleFrom(
-                      minimumSize: Size(120, 20),
-                   backgroundColor: Colors.greenAccent.shade200,shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.3))),
-               onPressed: (){},child: Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15),)),)
+
+
+
         ],
       ),
     );

@@ -424,7 +424,7 @@ class _AddressState extends State<Address> {
             "password":passwordController.text,
             "image":image
           };
-          await FirebaseFirestore.instance.collection("Users").add(details);
+          await FirebaseFirestore.instance.collection("Users").doc(mobileController.text).set(details);
           Navigator.push (
             context,
             MaterialPageRoute (
