@@ -1,31 +1,41 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class Transaction extends StatefulWidget {
-  String?phoneNumber;
-   Transaction({Key? key,this.phoneNumber}) : super(key: key);
+  String? phoneNumber;
+  Transaction({Key? key, this.phoneNumber}) : super(key: key);
 
   @override
-  _TransactionState createState() => _TransactionState(phoneNumber:this.phoneNumber);
+  _TransactionState createState() =>
+      _TransactionState(phoneNumber: this.phoneNumber);
 }
 
 class _TransactionState extends State<Transaction> {
-  String?phoneNumber;
+  String? phoneNumber;
+  DateTime? pickupDate;
+  DateTime? pickdate;
+  String? startingdate;
+  DateTime ?start;
+  String ?end;
+  DateTimeRange? dateTimeRange;
+  DateTime? end_date;
+  String? dates;
+  bool? pressed = false;
+
   _TransactionState({this.phoneNumber});
+
   @override
   Widget build(BuildContext context) {
     var investments = FirebaseFirestore.instance
         .collection("Investments")
         .doc(phoneNumber)
         .get();
-    var requestinvestments = FirebaseFirestore.instance
-        .collection("requestInvestments").snapshots();
-    var requestWithdrawls = FirebaseFirestore.instance
-        .collection("requestwithdrawls").snapshots();
+    var requestinvestments =
+    FirebaseFirestore.instance.collection("requestInvestments").snapshots();
+    var requestWithdrawls =
+    FirebaseFirestore.instance.collection("requestwithdrawls").snapshots();
     var investAmount;
     return Container(
       margin: EdgeInsets.all(16.3),
@@ -45,7 +55,7 @@ class _TransactionState extends State<Transaction> {
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.6),
               )),
-           Divider(
+          Divider(
             thickness: 0.6,
             color: Colors.black,
           ),
@@ -55,10 +65,16 @@ class _TransactionState extends State<Transaction> {
               child: Column(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(top: 6.3),
+                      margin: EdgeInsets.only(top: 6.3),
                       alignment: Alignment.center,
-                      child: Text("Available Amount",style: TextStyle(color: Colors.blue,fontWeight: FontWeight.w500),)),
-                  SizedBox(height: 5,),
+                      child: Text(
+                        "Available Amount",
+                        style: TextStyle(
+                            color: Colors.blue, fontWeight: FontWeight.w500),
+                      )),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Container(
                     alignment: Alignment.center,
                     child: get_invests(investments, investAmount),
@@ -67,180 +83,273 @@ class _TransactionState extends State<Transaction> {
               ),
             ),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 12.3),
+          Center(
+
             child: Column(
               children: [
-                Divider(color: Colors.black),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+
+                Column(
                   children: [
-                    Text("Date"),
-                    Text("Transactions"),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: MediaQuery
+                              .of(context)
+                              .size
+                              .width / 1.25,
+                          alignment: Alignment.topLeft,
+                          margin: EdgeInsets.only(right: 3.3),
+                          decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(1.3)),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                child: Container(
+                                    child: TextButton(
+                                      style: TextButton.styleFrom(
+                                          padding: EdgeInsets.zero),
+                                      onPressed: () async {
+                                        dateTimeRange =
+                                        await showDateRangePicker(
+                                          context: context,
+                                          firstDate: DateTime(2022),
+                                          lastDate: DateTime.now(),
+                                        );
+                                        setState(() {
+                                          start = dateTimeRange!.start;
+                                          end_date = dateTimeRange!.end;
+                                          dates = DateFormat('yyyy-MM-dd')
+                                              .format(dateTimeRange!.start);
+                                          end = DateFormat("yyyy-MM-dd").format(
+                                              dateTimeRange!.end);
+
+                                        });
+                                      },
+                                      child: Icon(
+                                        Icons.date_range_outlined,
+                                        size: 25,
+                                      ),
+                                    )),
+                              ),
+                              Text(dateTimeRange != null
+                                  ? dates.toString() + "  -  " + end.toString()
+                                  : "Select date"),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    ),
+                    Center(
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                              backgroundColor: Colors.blueGrey),
+                          onPressed: () {
+                            setState(() {
+                              pressed = true;
+                            });
+                          },
+                          child: Text("Search", style: TextStyle(color: Colors
+                              .white),)),
+                    )
                   ],
-                ),
-                Divider(color: Colors.black,),
-                   get_allinvestments(requestinvestments,requestWithdrawls)
-                  ],
+
                 ),
 
+                pressed == true ? Column(
+                  children: [
+                    SizedBox(height: 10,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text("Date"),
+                        Text("Transactions"),
+                      ],
+                    ),
+                    Divider(color: Colors.grey,),
+                    Container(
+                      child: get_allinvestments(
+                          requestinvestments, requestWithdrawls),
+                    )
+                  ],
+                ) : Container(),
+
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
   get_invests(invest, investAmount) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: invest,
-      builder: (context, snap) {
-        if (snap.hasData && snap.requireData.exists) {
-          investAmount = snap.data;
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                  "₹ ${investAmount!.get("InvestAmount")}",
-                  style: TextStyle(color: Colors.green, fontWeight:FontWeight.w900,fontSize: 15,fontFamily: "Poppins-Medium")),
-            ],
-          );
-        }
-        else{
-          return Container(child: Text("₹ "+"0.00"),);
-        }
-        return Container();
-      },
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.3),
+      child: FutureBuilder<DocumentSnapshot>(
+        future: invest,
+        builder: (context, snap) {
+          if (snap.hasData && snap.requireData.exists) {
+            investAmount = snap.data;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("₹ ${investAmount!.get("InvestAmount")}",
+                    style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                        fontFamily: "Poppins-Medium")),
+              ],
+            );
+          } else {
+            return Container(
+              child: Text("₹ " + "0.00"),
+            );
+          }
+
+        },
+      ),
     );
   }
 
-  get_allinvestments(requestinvestments,requestwithdrawls) {
+  get_allinvestments(requestinvestments, requestWithdrawls) {
     return StreamBuilder<QuerySnapshot>(
-      stream: requestinvestments,
-      builder: (context, snap) {
-        if (snap.hasData) {
-          List<QueryDocumentSnapshot> userinvestments = snap.data!.docs;
-         return StreamBuilder<QuerySnapshot>(
-              stream: requestwithdrawls,
-           builder: (context,snapshot){
-                if(snapshot.hasData){
-                  List transaction =[];
-                  List<QueryDocumentSnapshot>  userwithdrawls = snapshot.data!.docs;
-                  userinvestments.addAll(userwithdrawls);
-                  var data = get_check(userinvestments);
-                   return  Container(
-                     child: ListView.builder(
-                       itemCount: data.length,
-                         padding: EdgeInsets.zero,
-                         shrinkWrap: true,
-                         itemBuilder: (context,index){
-                        return Container(
-                          margin: EdgeInsets.only(bottom: 12.3),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Container(
-                                  child: Text(data[index][0],style: TextStyle(),)),
-                              Container(
-                                  child: Text(data[index][1],style: TextStyle(fontSize: 15),))
-                            ],
-                          ),
-                        );
-                     }),
-                   );
-                }return CircularProgressIndicator();
-           },
-         );
+        stream: requestinvestments,
+        builder: (context, snap) {
+          if (snap.hasData) {
+            List<QueryDocumentSnapshot> userinvestments = snap.data!.docs;
+            List invest_dates = get_dates(userinvestments);
+            return StreamBuilder<QuerySnapshot>(
+              stream: requestWithdrawls,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<QueryDocumentSnapshot> userwithdrawls = snapshot.data!
+                      .docs;
+                  List withdrawl_dates = get_dates(userwithdrawls);
+                  invest_dates.addAll(withdrawl_dates);
+                  List sorting_dates = get_sort(invest_dates);
+                  List selected_dates = getDaysInBetween(start!,end_date!);
+                  List? transactions = get_data(selected_dates,sorting_dates,userinvestments,userwithdrawls);
+                   print(transactions![2][2]);
+                  return Container(
+                   child: ListView.builder(
+                       shrinkWrap: true,
+                       itemCount: transactions.length,
+                       padding: EdgeInsets.zero,
+                       itemBuilder: (context,index){
+                       return Container(
+                         child: Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceAround,
+                           children: [
+                             Text(transactions[index][0]),
+                             transactions[index][1][0]=="+"?Container(
+                               padding: EdgeInsets.only(bottom: 12.3),
+                               child: Row(
+                                 children: [
+                                    Container(
+                                        padding: EdgeInsets.only(right: 5.3),
+                                        child: Text( transactions[index][1][0],style: TextStyle(color: Colors.green,fontSize: 15),)),
+                                   Text(transactions[index][2],style: TextStyle(color: Colors.green,fontSize: 15),)
+                                 ],
+                               ),
+                             ):Container(
+                               padding: EdgeInsets.only(bottom: 12.3),
 
+                               child: Row(
+                                 children: [
+                                   Container(
+                                       padding: EdgeInsets.only(right: 8.3),
+                                       child: Text( transactions[index][1][0],style: TextStyle(color: Colors.red,fontSize: 15),)),
+                                   Text(transactions[index][2],style: TextStyle(color: Colors.red),)
+
+                                 ],
+                               ),
+                             )
+                           ],
+                         ),
+                       );
+                   }),
+                  );
+                }
+                return Container();
+              },
+            );
+          }
+          return CircularProgressIndicator();
         }
-        return CircularProgressIndicator();
-      },
     );
   }
 
-  get_dates(QuerySnapshot<Object?>? userinvestments) {
-    List dates =[];
-    for(int i =0;i<userinvestments!.docs.length;i++){
-      if(userinvestments.docs[i].get("phonenumber")== phoneNumber){
-        if(userinvestments.docs[i].get("status")=="Accept"){
-          var createdAt = userinvestments.docs[i].get("CreatedAt");
-          var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
-          dates.add(date.toString());
-        }
+  get_dates(List<QueryDocumentSnapshot<Object?>> userinvestments) {
+    List dates = [];
+    for (int i = 0; i < userinvestments.length; i++) {
+      if (userinvestments[i].get("phonenumber") == phoneNumber &&
+          userinvestments[i].get("status") == "Accept") {
+        var date = DateTime.fromMicrosecondsSinceEpoch(userinvestments[i]
+            .get("CreatedAt")
+            .microsecondsSinceEpoch);
+        dates.add(date);
       }
     }
     return dates;
   }
 
-  List? get_sort(List investDates) {
-    for(int i =0;i<investDates.length;i++){
-      investDates.sort((a, b) {
-        return a.compareTo(b);
-      },);
-    }
-    return investDates;
-  }
-
-  get_check(List<QueryDocumentSnapshot<Object?>> userinvestments) {
-    List investments =[];
-    List dates =[];
-    var symbol;
-    for(int i =0;i<userinvestments.length;i++){
-      if(userinvestments[i].get("status")=="Accept"&&userinvestments[i].get("phonenumber")==phoneNumber) {
-        var date = DateTime.fromMicrosecondsSinceEpoch(userinvestments[i]
-            .get("CreatedAt")
-            .microsecondsSinceEpoch);
-       dates.add(date);
-      }
-      }
+  get_sort(List dates) {
+    List format_dates = [];
     for(int i =0;i<dates.length;i++){
       dates.sort((a, b) {
         return a.compareTo(b);
       },);
     }
-
-    for(int i =0;i<userinvestments.length;i++){
-      var createdAt = userinvestments[i].get("CreatedAt");
-      var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
-      for(int j =0;j<dates.length;j++){
-        if(userinvestments[i].get("phonenumber")== phoneNumber&&dates[j].toString()==date.toString()){
-          DateTime dateTime = userinvestments[i].get("CreatedAt").toDate();
-          var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
-          if(userinvestments[i].get("Type")=="Credit"){
-            symbol ="+";
-          }
-          if(userinvestments[i].get("Type")=="Debit"){
-            symbol ="-";
-          }
-          investments.add([datetime,"$symbol "+ userinvestments[i].get("InvestAmount")]);
-
-        }
-      }
+   for(int j =0;j<dates.length;j++){
+     DateTime? dateTime = dates[j];
+     var formatdate = DateFormat('dd/MM/yyyy').format(dateTime!);
+     format_dates.add(formatdate);
+   }
+   return format_dates;
+  }
+  List<DateTime> getDaysInBetween(DateTime startDate, DateTime endDate) {
+    List<DateTime> days = [];
+    for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+      days.add(startDate.add(Duration(days: i)));
     }
-    return investments;
+    return days;
   }
 
+  List? get_data(List selected_dates, List sorting_dates, List<QueryDocumentSnapshot> userinvestments,
+      List<QueryDocumentSnapshot> userwithdrawls) {
+   List format_dates =[];
+   List all_transactions =[];
+   String symbol;
+    userinvestments.addAll(userwithdrawls);
+     for(int i =0;i<selected_dates.length;i++){
+       format_dates.add(DateFormat('dd/MM/yyyy').format(selected_dates[i]));
+     }
+   for(int i =0;i<userinvestments.length;i++){
+     if(userinvestments[i].get("phonenumber")==phoneNumber&&userinvestments[i].get("status")=="Accept"){
+       var createdAt = userinvestments[i].get("CreatedAt");
+       DateTime dateTime = userinvestments[i].get("CreatedAt").toDate();
+       var dateformat = DateFormat('dd/MM/yyyy').format(dateTime);
+      for(int j=0;j<format_dates.length;j++){
+        if(format_dates[j]==dateformat){
+           if(userinvestments[i].get("Type")=="Credit"){
+             symbol = "+";
+           }
+           else{
+             symbol = "-";
+           }
+           var amount = userinvestments[i].get("InvestAmount");
 
-
-  get_data(QuerySnapshot<Object?>? userinvestments, List dates) {
-    List investments =[];
-
-    for(int i =0;i<userinvestments!.docs.length;i++){
-      var createdAt = userinvestments.docs[i].get("CreatedAt");
-      var date = DateTime.fromMicrosecondsSinceEpoch(createdAt.microsecondsSinceEpoch);
-
-      if(userinvestments.docs[i].get("status")=="Accept"){
-        for(int j=0;j<dates.length;j++){
-          if(userinvestments.docs[i].get("phonenumber")== phoneNumber&&dates[j].toString()==date.toString()){
-            DateTime dateTime = userinvestments.docs[i].get("CreatedAt").toDate();
-            var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
-            investments.add([datetime,userinvestments.docs[i].get("InvestAmount")]);
-          }
+           all_transactions.add([dateformat,[symbol],amount]);
         }
       }
-    }
-
-    return investments;
+     }
+   }
+   return all_transactions;
   }
-
 }
-
-
