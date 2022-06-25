@@ -17,8 +17,8 @@ class _TransactionState extends State<Transaction> {
   DateTime? pickupDate;
   DateTime? pickdate;
   String? startingdate;
-  DateTime ?start;
-  String ?end;
+  DateTime? start;
+  String? end;
   DateTimeRange? dateTimeRange;
   DateTime? end_date;
   String? dates;
@@ -33,9 +33,9 @@ class _TransactionState extends State<Transaction> {
         .doc(phoneNumber)
         .get();
     var requestinvestments =
-    FirebaseFirestore.instance.collection("requestInvestments").snapshots();
+        FirebaseFirestore.instance.collection("requestInvestments").snapshots();
     var requestWithdrawls =
-    FirebaseFirestore.instance.collection("requestwithdrawls").snapshots();
+        FirebaseFirestore.instance.collection("requestwithdrawls").snapshots();
     var investAmount;
     return Container(
       margin: EdgeInsets.all(16.3),
@@ -84,10 +84,8 @@ class _TransactionState extends State<Transaction> {
             ),
           ),
           Center(
-
             child: Column(
               children: [
-
                 Column(
                   children: [
                     Row(
@@ -95,10 +93,7 @@ class _TransactionState extends State<Transaction> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width / 1.25,
+                          width: MediaQuery.of(context).size.width / 1.25,
                           alignment: Alignment.topLeft,
                           margin: EdgeInsets.only(right: 3.3),
                           decoration: BoxDecoration(
@@ -111,30 +106,28 @@ class _TransactionState extends State<Transaction> {
                               SizedBox(
                                 child: Container(
                                     child: TextButton(
-                                      style: TextButton.styleFrom(
-                                          padding: EdgeInsets.zero),
-                                      onPressed: () async {
-                                        dateTimeRange =
-                                        await showDateRangePicker(
-                                          context: context,
-                                          firstDate: DateTime(2022),
-                                          lastDate: DateTime.now(),
-                                        );
-                                        setState(() {
-                                          start = dateTimeRange!.start;
-                                          end_date = dateTimeRange!.end;
-                                          dates = DateFormat('yyyy-MM-dd')
-                                              .format(dateTimeRange!.start);
-                                          end = DateFormat("yyyy-MM-dd").format(
-                                              dateTimeRange!.end);
-
-                                        });
-                                      },
-                                      child: Icon(
-                                        Icons.date_range_outlined,
-                                        size: 25,
-                                      ),
-                                    )),
+                                  style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero),
+                                  onPressed: () async {
+                                    dateTimeRange = await showDateRangePicker(
+                                      context: context,
+                                      firstDate: DateTime(2022),
+                                      lastDate: DateTime.now(),
+                                    );
+                                    setState(() {
+                                      start = dateTimeRange!.start;
+                                      end_date = dateTimeRange!.end;
+                                      dates = DateFormat('yyyy-MM-dd')
+                                          .format(dateTimeRange!.start);
+                                      end = DateFormat("yyyy-MM-dd")
+                                          .format(dateTimeRange!.end);
+                                    });
+                                  },
+                                  child: Icon(
+                                    Icons.date_range_outlined,
+                                    size: 25,
+                                  ),
+                                )),
                               ),
                               Text(dateTimeRange != null
                                   ? dates.toString() + "  -  " + end.toString()
@@ -142,7 +135,6 @@ class _TransactionState extends State<Transaction> {
                             ],
                           ),
                         ),
-
                       ],
                     ),
                     Center(
@@ -154,31 +146,36 @@ class _TransactionState extends State<Transaction> {
                               pressed = true;
                             });
                           },
-                          child: Text("Search", style: TextStyle(color: Colors
-                              .white),)),
+                          child: Text(
+                            "Submit",
+                            style: TextStyle(color: Colors.white),
+                          )),
                     )
                   ],
-
                 ),
-
-                pressed == true ? Column(
-                  children: [
-                    SizedBox(height: 10,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Text("Date"),
-                        Text("Transactions"),
-                      ],
-                    ),
-                    Divider(color: Colors.grey,),
-                    Container(
-                      child: get_allinvestments(
-                          requestinvestments, requestWithdrawls),
-                    )
-                  ],
-                ) : Container(),
-
+                pressed == true
+                    ? ListView(
+                       shrinkWrap: true,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text("Date"),
+                              Text("Transactions"),
+                            ],
+                          ),
+                          Divider(
+                            color: Colors.grey,
+                          ),
+                          Container(
+                            child: get_allinvestments(
+                                requestinvestments, requestWithdrawls),
+                          )
+                        ],
+                      )
+                    : Container(
+                   margin: EdgeInsets.zero,
+                ),
               ],
             ),
           ),
@@ -211,7 +208,6 @@ class _TransactionState extends State<Transaction> {
               child: Text("₹ " + "0.00"),
             );
           }
-
         },
       ),
     );
@@ -223,95 +219,111 @@ class _TransactionState extends State<Transaction> {
         builder: (context, snap) {
           if (snap.hasData) {
             List<QueryDocumentSnapshot> userinvestments = snap.data!.docs;
-            List invest_dates = get_dates(userinvestments);
             return StreamBuilder<QuerySnapshot>(
               stream: requestWithdrawls,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  List<QueryDocumentSnapshot> userwithdrawls = snapshot.data!
-                      .docs;
-                  List withdrawl_dates = get_dates(userwithdrawls);
-                  invest_dates.addAll(withdrawl_dates);
-                  List sorting_dates = get_sort(invest_dates);
-                  List selected_dates = getDaysInBetween(start!,end_date!);
-                  List? transactions = get_data(selected_dates,sorting_dates,userinvestments,userwithdrawls);
-                  return Container(
-                   child: ListView.builder(
-                       shrinkWrap: true,
-                       itemCount: transactions!.length,
-                       padding: EdgeInsets.zero,
-                       itemBuilder: (context,index){
-                       return Container(
-                         child: Row(
-                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                           children: [
-                             Text(transactions[index][0]),
-                             transactions[index][1][0]=="+"?Container(
-                               padding: EdgeInsets.only(bottom: 12.3),
-                               child: Row(
-                                 children: [
-                                    Container(
-                                        padding: EdgeInsets.only(right: 5.3),
-                                        child: Text( transactions[index][1][0],style: TextStyle(color: Colors.green,fontSize: 15),)),
-                                   Text(transactions[index][2],style: TextStyle(color: Colors.green,fontSize: 15),)
-                                 ],
-                               ),
-                             ):Container(
-                               padding: EdgeInsets.only(bottom: 12.3),
+                  List<QueryDocumentSnapshot> userwithdrawls =
+                      snapshot.data!.docs;
+                  userinvestments.addAll(userwithdrawls);
+                  List selected_dates = getDaysInBetween(start!, end_date!);
+                  List dates = get_dates(userinvestments);
+                  List? transactions =
+                      get_transactions(dates, selected_dates, userinvestments);
+                  print(transactions);
+                  return ListView.builder(
+                        itemCount: transactions!.length,
+                        shrinkWrap: true,
+                        physics: ScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Text(transactions[index][0]),
+                              transactions[index][1][0] == "+"
+                                  ? Container(
+                                      padding: EdgeInsets.only(bottom: 12.3),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                              padding:
+                                                  EdgeInsets.only(right: 5.3),
+                                              child: Text(
+                                                transactions[index][1][0],
+                                                style: TextStyle(
+                                                    color: Colors.green,
+                                                    fontSize: 15),
+                                              )),
+                                          Text(
+                                            transactions[index][2],
+                                            style: TextStyle(
+                                                color: Colors.green,
+                                                fontSize: 15),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  : Container(
+                                      padding: EdgeInsets.only(bottom: 12.3),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                              padding:
+                                                  EdgeInsets.only(right: 8.3),
+                                              child: Text(
+                                                transactions[index][1][0],
+                                                style: TextStyle(
+                                                    color: Colors.red,
+                                                    fontSize: 15),
+                                              )),
+                                          Text(
+                                            transactions[index][2],
+                                            style: TextStyle(color: Colors.red),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                            ],
+                          );
+                        });
 
-                               child: Row(
-                                 children: [
-                                   Container(
-                                       padding: EdgeInsets.only(right: 8.3),
-                                       child: Text( transactions[index][1][0],style: TextStyle(color: Colors.red,fontSize: 15),)),
-                                   Text(transactions[index][2],style: TextStyle(color: Colors.red),)
-
-                                 ],
-                               ),
-                             )
-                           ],
-                         ),
-                       );
-                   }),
-                  );
                 }
                 return Container();
               },
             );
           }
           return CircularProgressIndicator();
-        }
-    );
+        });
   }
 
   get_dates(List<QueryDocumentSnapshot<Object?>> userinvestments) {
     List dates = [];
+    List all_dates = [];
     for (int i = 0; i < userinvestments.length; i++) {
       if (userinvestments[i].get("phonenumber") == phoneNumber &&
           userinvestments[i].get("status") == "Accept") {
-        var date = DateTime.fromMicrosecondsSinceEpoch(userinvestments[i]
-            .get("CreatedAt")
-            .microsecondsSinceEpoch);
+        var date = DateTime.fromMicrosecondsSinceEpoch(
+            userinvestments[i].get("CreatedAt").microsecondsSinceEpoch);
         dates.add(date);
+        all_dates = get_sort(dates);
       }
     }
-    return dates;
+    return all_dates;
   }
 
   get_sort(List dates) {
     List format_dates = [];
-    for(int i =0;i<dates.length;i++){
-      dates.sort((a, b) {
-        return a.compareTo(b);
-      },);
+    for (int i = 0; i < dates.length; i++) {
+      dates.sort(
+        (a, b) {
+          return a.compareTo(b);
+        },
+      );
     }
-   for(int j =0;j<dates.length;j++){
-     DateTime? dateTime = dates[j];
-     var formatdate = DateFormat('dd/MM/yyyy').format(dateTime!);
-     format_dates.add(formatdate);
-   }
-   return format_dates;
+
+    return dates;
   }
+
   List<DateTime> getDaysInBetween(DateTime startDate, DateTime endDate) {
     List<DateTime> days = [];
     for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
@@ -320,35 +332,39 @@ class _TransactionState extends State<Transaction> {
     return days;
   }
 
-  List? get_data(List selected_dates, List sorting_dates, List<QueryDocumentSnapshot> userinvestments,
-      List<QueryDocumentSnapshot> userwithdrawls) {
-   List format_dates =[];
-   List all_transactions =[];
-   String symbol;
-    userinvestments.addAll(userwithdrawls);
-     for(int i =0;i<selected_dates.length;i++){
-       format_dates.add(DateFormat('dd/MM/yyyy').format(selected_dates[i]));
-     }
-   for(int i =0;i<userinvestments.length;i++){
-     if(userinvestments[i].get("phonenumber")==phoneNumber&&userinvestments[i].get("status")=="Accept"){
-       var createdAt = userinvestments[i].get("CreatedAt");
-       DateTime dateTime = userinvestments[i].get("CreatedAt").toDate();
-       var dateformat = DateFormat('dd/MM/yyyy').format(dateTime);
-      for(int j=0;j<format_dates.length;j++){
-        if(format_dates[j]==dateformat){
-           if(userinvestments[i].get("Type")=="Credit"){
-             symbol = "+";
-           }
-           else{
-             symbol = "-";
-           }
-           var amount = userinvestments[i].get("InvestAmount");
+  List? get_transactions(List dates, List selected_dates,
+      List<QueryDocumentSnapshot<Object?>> userinvestments) {
+    List format_dates = [];
+    List all_transactions = [];
+    List all_dates = [];
+    String symbol;
+    List afterSort = [];
+    String? dateformat;
 
-           all_transactions.add([dateformat,[symbol],amount]);
+    for (int i = 0; i < selected_dates.length; i++) {
+      format_dates.add(DateFormat('dd/MM/yyyy').format(selected_dates[i]));
+    }
+    for (int j = 0; j < dates.length; j++) {
+      dateformat = DateFormat('dd/MM/yyyy').format(dates[j]);
+      for (int k = 0; k < userinvestments.length; k++) {
+        DateTime dateTime = userinvestments[k].get("CreatedAt").toDate();
+        if (userinvestments[k].get("status") == "Accept" &&
+            dates[j] == dateTime &&
+            userinvestments[k].get("phonenumber") == phoneNumber) {
+          var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
+          if (userinvestments[k].get("Type") == "Credit") {
+            symbol = "+";
+          } else {
+            symbol = " - ";
+          }
+          all_transactions.add([
+            dateformat,
+            [symbol],
+            userinvestments[k].get("InvestAmount")
+          ]);
         }
       }
-     }
-   }
-   return all_transactions;
+    }
+    return all_transactions;
   }
 }
