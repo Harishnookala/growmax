@@ -235,11 +235,10 @@ class _TransactionState extends State<Transaction> {
                   List sorting_dates = get_sort(invest_dates);
                   List selected_dates = getDaysInBetween(start!,end_date!);
                   List? transactions = get_data(selected_dates,sorting_dates,userinvestments,userwithdrawls);
-                   print(transactions![2][2]);
                   return Container(
                    child: ListView.builder(
                        shrinkWrap: true,
-                       itemCount: transactions.length,
+                       itemCount: transactions!.length,
                        padding: EdgeInsets.zero,
                        itemBuilder: (context,index){
                        return Container(
