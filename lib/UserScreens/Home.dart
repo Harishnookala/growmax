@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
-import 'package:growmax/UserScreens/banking.dart';
 import 'package:growmax/UserScreens/withdraw.dart';
 import 'package:intl/intl.dart';
 import '../Forms/bank_details.dart';
@@ -76,39 +74,38 @@ class _HomeState extends State<Home> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Container(
-                                            margin: EdgeInsets.only(
+                                            margin: const EdgeInsets.only(
                                                 left: 12.3, top: 6.3,right: 12.3),
                                             child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
-                                                      child: Text(
-                                                        "Welcome " +
-                                                            users.docs[index]
-                                                                .get("firstname"),
-                                                        style: TextStyle(
-                                                            color: Colors.deepOrange,
-                                                          fontSize: 15,
-                                                          fontFamily: "Poppins-Medium"
+                                                    Text(
+                                                      "Welcome " + '${users.docs[index].get("firstname")}',
+                                                      style: const TextStyle(
+                                                          color: Colors.deepOrange,
+                                                        fontSize: 15,
+                                                        fontFamily: "Poppins-Medium"
 
-                                                        ),
                                                       ),
                                                     ),
                                                     Container(
-                                                      margin: EdgeInsets.only(
+                                                      margin: const EdgeInsets.only(
                                                         top: 1.0),
-                                                      child:  Text(
+                                                      width: MediaQuery.of(context).size.width/1.9,
+                                                      child:  const Text(
                                                         "This is the way to build your Future",
                                                         style: TextStyle(
                                                             fontSize: 13,
                                                             color: Colors.grey,
                                                             fontFamily: "Poppins-Medium"),
                                                       ),
-                                                      width: MediaQuery.of(context).size.width/1.9,
                                                     ),
                                                   ],
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                 ),
                                                 ProfilePicture(
                                                   name:
@@ -119,9 +116,6 @@ class _HomeState extends State<Home> {
                                                 )
 
                                               ],
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
                                             ),
                                           ),
 
@@ -161,12 +155,12 @@ class _HomeState extends State<Home> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
+                  alignment: Alignment.topLeft,
+                  margin: const EdgeInsets.only(top: 12.3, left: 13.3),
                   child: const Text(
                     "Today Portfolio Value : -  ",
                     style: TextStyle(color: Colors.white, fontWeight:FontWeight.w500,fontSize: 15,fontFamily: "Poppins-Medium"),
                   ),
-                  alignment: Alignment.topLeft,
-                  margin: const EdgeInsets.only(top: 12.3, left: 13.3),
                 ),
                 Container(
                   margin: const EdgeInsets.only(
@@ -336,8 +330,8 @@ class _HomeState extends State<Home> {
           return Row(
             children: [
               Text(
-                "₹ " + investAmount!.get("InvestAmount").toString(),
-        style: TextStyle(color: Colors.white, fontWeight:FontWeight.w900,fontSize: 16,fontFamily: "Poppins-Medium")),
+                "₹ ${investAmount!.get("InvestAmount")}",
+        style: const TextStyle(color: Colors.white, fontWeight:FontWeight.w900,fontSize: 16,fontFamily: "Poppins-Medium")),
             ],
           );
         }
@@ -423,12 +417,12 @@ class _HomeState extends State<Home> {
         children: [
           Container(
               width: 130,
+              margin: const EdgeInsets.only(
+                  top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
               child: const Center(
                   child: Text("Invested Amount",
                       style: TextStyle(
-                          color: Colors.deepOrange, fontWeight: FontWeight.bold,fontFamily: "Poppins-Medium"))),
-              margin: const EdgeInsets.only(
-                  top: 5.3, bottom: 3.3, left: 3.3, right: 5.3)),
+                          color: Colors.deepOrange, fontWeight: FontWeight.bold,fontFamily: "Poppins-Medium")))),
           const SizedBox(
             height: 5,
           ),
@@ -465,14 +459,14 @@ class _HomeState extends State<Home> {
             children: [
               Container(
                   width: 130,
+                  margin: const EdgeInsets.only(
+                      top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
                   child: const Center(
                       child: Text(
                     "Current Gains",
                     style: TextStyle(
                         color: Colors.brown, fontWeight: FontWeight.w600),
-                  )),
-                  margin: const EdgeInsets.only(
-                      top: 5.3, bottom: 3.3, left: 3.3, right: 5.3)),
+                  ))),
               const SizedBox(
                 height: 5,
               ),

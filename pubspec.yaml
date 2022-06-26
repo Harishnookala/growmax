@@ -52,6 +52,7 @@ dependencies:
   shared_preferences: ^2.0.6
   flutter_simple_dependency_injection: ^2.0.0
   get: ^4.6.5
+  back_button_interceptor: ^6.0.0
 
 dev_dependencies:
   flutter_test:

@@ -6,6 +6,7 @@ import '../UserScreens/home.dart';
 import '../Login.dart';
 import 'Transaction.dart';
 import 'banking.dart';
+import 'drawer.dart';
 
 class userPannel extends StatefulWidget {
   String? phoneNumber;
@@ -49,42 +50,12 @@ class userPannelState extends State<userPannel> {
               child: Container(
             margin: const EdgeInsets.only(left: 12.3, right: 12.3),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(
                   height: 35,
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        width: 100,
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginPage()),
-                              );
-                            },
-                            child: Text("Log Out"))),
-                    Container(
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => userPannel(
-                                      phoneNumber: phoneNumber,
-                                    )),
-                          );
-                        },
-                        child: Icon(Icons.close_outlined),
-                      ),
-                    ),
-                  ],
-                ),
+                drawer(phonenumber: phoneNumber,)
               ],
             ),
           )),
