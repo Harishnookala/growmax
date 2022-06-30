@@ -95,7 +95,7 @@ class _ProfileState extends State<Profile> {
 
                                   children: [
                                     Text("Dateofbirth:-"),
-                                    Text(users.get("dateofbirth"))
+                                    users.get("dateofbirth".toString())==null?Container():Text(users.get("dateofbirth"))
                                   ],
                                 ),
                                 margin: EdgeInsets.only(bottom: 8.3),
@@ -115,11 +115,7 @@ class _ProfileState extends State<Profile> {
                                 margin: EdgeInsets.only(bottom: 16.3),
 
                               ),
-                              Center(child: TextButton(
-                                  style: TextButton.styleFrom(
-                                      minimumSize: Size(120, 20),
-                                      backgroundColor: Colors.greenAccent.shade200,shape:RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.3))),
-                                  onPressed: (){},child: Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15),)),)
+
                             ],
                           );
                         }return CircularProgressIndicator();

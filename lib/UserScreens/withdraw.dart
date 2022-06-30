@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 
 class withdraw extends StatefulWidget {
@@ -17,6 +18,8 @@ class _withdrawState extends State<withdraw> {
   int? Investments;
 
   bool pressed = true;
+  final formKey = GlobalKey<FormState>();
+
   _withdrawState({this.phonenumber});
   @override
   Widget build(BuildContext context) {
@@ -66,9 +69,10 @@ class _withdrawState extends State<withdraw> {
                                 fontFamily: "Poppins-Medium"),
                           );
                         }
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        else{
+                          return Text("₹ 0.00",style: TextStyle(fontFamily: "Poppins-Light",fontSize: 16),);
+                        }
+
                       },
                     ),
                     SizedBox(
@@ -82,83 +86,95 @@ class _withdrawState extends State<withdraw> {
                         style: TextStyle(color: Colors.deepOrange),
                       ),
                     ),
-                    SizedBox(
-                      height: 70,
-                      width: 300,
-                      child: Container(
-                        margin: const EdgeInsets.only(
-                            top: 5.8, left: 6.3, bottom: 12.3),
-                        child: TextFormField(
-                          validator: (amount) {
-                            if (amount!.isEmpty) {
-                              return 'Please enter Amount';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                              prefix: Container(
-                                margin: const EdgeInsets.only(right: 8.3),
-                                child: const Text("₹",
-                                    style: TextStyle(fontSize: 15)),
-                              ),
-                              focusedBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Colors.greenAccent, width: 2.0),
-                              ),
-                              labelText: "Enter Amount",
-                              labelStyle:
-                                  const TextStyle(color: Color(0xff576630)),
-                              border: OutlineInputBorder(
-                                gapPadding: 1.3,
-                                borderRadius: BorderRadius.circular(4.5),
-                              ),
-                              enabledBorder: const OutlineInputBorder(
-                                borderSide: BorderSide(
-                                    color: Color(0xcc9fce4c), width: 1.5),
-                              ),
-                              hintStyle: const TextStyle(color: Colors.brown)),
-                          controller: debitController,
-                        ),
-                      ),
-                    ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                          minimumSize: const Size(80, 30),
-                          backgroundColor: Colors.deepOrange),
-                      onPressed: () async {
-                        setState(() {
-                          var investamount = double.parse(amount!.get("InvestAmount"));
-                          var debit = double.parse(debitController.text);
-                          if(investamount>=debit){
-                            pressed = true;
-                          }
+                   Form(
+                    key: formKey,
+                     child: Column(
+                       children: [
+                         SizedBox(
+                           height: 70,
+                           width: 300,
+                           child: Container(
+                             margin: const EdgeInsets.only(
+                                 top: 5.8, left: 6.3, bottom: 12.3),
+                             child: TextFormField(
+                               validator: (amount) {
+                                 if (amount!.isEmpty||!amount.isNum) {
+                                   return 'Please enter Amount';
+                                 }
+                                 return null;
+                               },
+                               decoration: InputDecoration(
+                                   prefix: Container(
+                                     margin: const EdgeInsets.only(right: 8.3),
+                                     child: const Text("₹",
+                                         style: TextStyle(fontSize: 15)),
+                                   ),
+                                   focusedBorder: const OutlineInputBorder(
+                                     borderSide: BorderSide(
+                                         color: Colors.greenAccent, width: 2.0),
+                                   ),
+                                   labelText: "Enter Amount",
+                                   labelStyle:
+                                   const TextStyle(color: Color(0xff576630)),
+                                   border: OutlineInputBorder(
+                                     gapPadding: 1.3,
+                                     borderRadius: BorderRadius.circular(4.5),
+                                   ),
+                                   enabledBorder: const OutlineInputBorder(
+                                     borderSide: BorderSide(
+                                         color: Color(0xcc9fce4c), width: 1.5),
+                                   ),
+                                   hintStyle: const TextStyle(color: Colors.brown)),
+                               controller: debitController,
+                             ),
+                           ),
+                         ),
+                         TextButton(
+                           style: TextButton.styleFrom(
+                               minimumSize: const Size(80, 30),
+                               backgroundColor: Colors.deepOrange),
+                           onPressed: () async {
+                             setState(() {
+                               var investamount = double.parse(amount!.get("InvestAmount"));
+                               var debit = double.parse(debitController.text);
+                               if(investamount>=debit){
+                                 pressed = true;
+                                 print(pressed);
+                               }
+                               else{
+                                 pressed =false;
+                               }
 
-                        });
-                          if(pressed){
-                            Map<String, dynamic> data = {
-                              "phonenumber": phonenumber,
-                              "InvestAmount": debitController.text.toString(),
-                              "CreatedAt": DateTime.now(),
-                              "status": "pending",
-                              "Type" : "Debit",
-                            };
-                            await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => userPannel(
-                                    phoneNumber: phonenumber,
-                                  )),
-                            );
-                          }
+                             });
+                             if(formKey.currentState!.validate()){
+                               print(debitController.text);
+                               Map<String, dynamic> data = {
+                                 "phonenumber": phonenumber,
+                                 "InvestAmount": debitController.text.toString(),
+                                 "CreatedAt": DateTime.now(),
+                                 "status": "pending",
+                                 "Type" : "Debit",
+                               };
+                               await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(
+                                     builder: (context) => userPannel(
+                                       phoneNumber: phonenumber,
+                                     )),
+                               );
+                             }
 
-                        },
+                           },
 
-                      child:  Text(
-                        "Withdraw",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                           child:  Text(
+                             "Withdraw",
+                             style: TextStyle(color: Colors.white),
+                           ),
+                         ),
+                       ],
+                     ),
+                   )
 
                   ],
                 )),

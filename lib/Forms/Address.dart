@@ -12,6 +12,12 @@ class Address extends StatefulWidget {
   String ?fathername;
       String ?mothername;
       var image;
+  bool securedValue = true;
+  bool isChecked = false;
+  Icon fab = const Icon(
+    Icons.visibility_off,
+    color: Colors.grey,
+  );
    Address({Key? key, this.firstname,this.fathername,this.lastname,this.gender,this.birth_date,this.married_status,this.mothername,this.image }) : super(key: key);
 
   @override
@@ -24,15 +30,22 @@ class _AddressState extends State<Address> {
   TextEditingController addressController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController reEnterPasswordController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
   bool securedValue = true;
-  bool isChecked = false;
+  bool isChecked = true;
   Icon fab = const Icon(
     Icons.visibility_off,
     color: Colors.grey,
   );
+  Icon passwordshown = const Icon(
+    Icons.visibility_off,
+    color: Colors.grey,
+  );
   bool login_success = false;
- var image;
+  bool inProgress = false;
+
+  var image;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -40,106 +53,118 @@ class _AddressState extends State<Address> {
       home: Scaffold(
         body: Container(
           margin: EdgeInsets.all(12.3),
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Column(
-                children: [
-                  Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
-                  Container(
-                    margin: EdgeInsets.only(left: 14.3,top: 5.3,bottom: 5.3),
-                    alignment: Alignment.topLeft,
-                    child: Text("Address & Communication",style: TextStyle(letterSpacing: 0.6,
-                        color: Colors.indigoAccent,
-                        fontFamily: "Poppins-Light",
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16),),
-                  ),
-                  Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
-                  Container(
-                    alignment: Alignment.topLeft,
-                    margin: const EdgeInsets.only(left: 16.3,top: 12.3),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          child: const Text(
-                            "Mobile number : -",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                fontSize: 15,
-                                letterSpacing: 0.6,
-                                fontFamily: "Poppins-Light"),
-                          ),
-                          margin: EdgeInsets.only(bottom: 8.5),
-                        ),
-                        build_mobile(),
-                        SizedBox(height: 5,),
-                        Container(
-                          child: const Text(
-                            "Email : -",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                fontSize: 15,
-                                letterSpacing: 0.6,
-                                fontFamily: "Poppins-Light"),
-                          ),
-                          margin: EdgeInsets.only(bottom: 8.5),
-                        ),
-                        build_email(),
-                        SizedBox(height: 5,),
-                        Container(
-                          child: const Text(
-                            "Address : -",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                fontSize: 15,
-                                letterSpacing: 0.6,
-                                fontFamily: "Poppins-Light"),
-                          ),
-                          margin: EdgeInsets.only(bottom: 8.5),
-                        ),
-                        build_address(),
-                        SizedBox(height: 15,),
-                        Container(
-                          child: const Text(
-                            "Password : -",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                fontSize: 15,
-                                letterSpacing: 0.6,
-                                fontFamily: "Poppins-Light"),
-                          ),
-                          margin: EdgeInsets.only(bottom: 8.5),
-                        ),
-                        build_password(),
-                        SizedBox(height: 10,),
-                        Container(
-                          child: const Text(
-                            "ReEnterPassword : -",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                                fontSize: 15,
-                                letterSpacing: 0.6,
-                                fontFamily: "Poppins-Light"),
-                          ),
-                          margin: EdgeInsets.only(bottom: 8.5),
-                        ),
-                        buildRenterPassword(),
-                        build_button(),
-
-                      ],
+          child: Form(
+            key: formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Column(
+                  children: [
+                    Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
+                    Container(
+                      margin: EdgeInsets.only(left: 14.3,top: 5.3,bottom: 5.3),
+                      alignment: Alignment.topLeft,
+                      child: Text("Address & Communication",style: TextStyle(letterSpacing: 0.6,
+                          color: Colors.indigoAccent,
+                          fontFamily: "Poppins-Light",
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16),),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
+                    Container(
+                      alignment: Alignment.topLeft,
+                      margin: const EdgeInsets.only(left: 16.3,top: 12.3),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: const Text(
+                              "Mobile number : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrangeAccent,
+                                  fontSize: 15,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins-Light"),
+                            ),
+                            margin: EdgeInsets.only(bottom: 8.5),
+                          ),
+                          build_mobile(),
+                          SizedBox(height: 5,),
+                          Container(
+                            child: const Text(
+                              "Email : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrangeAccent,
+                                  fontSize: 15,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins-Light"),
+                            ),
+                            margin: EdgeInsets.only(bottom: 8.5),
+                          ),
+                          build_email(),
+                          SizedBox(height: 5,),
+                          Container(
+                            child: const Text(
+                              "Address : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrangeAccent,
+                                  fontSize: 15,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins-Light"),
+                            ),
+                            margin: EdgeInsets.only(bottom: 8.5),
+                          ),
+                          build_address(),
+                          SizedBox(height: 15,),
+                          Container(
+                            child: const Text(
+                              "Password : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrangeAccent,
+                                  fontSize: 15,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins-Light"),
+                            ),
+                            margin: EdgeInsets.only(bottom: 8.5),
+                          ),
+                          build_password(),
+                          SizedBox(height: 10,),
+                          Container(
+                            child: const Text(
+                              "ReEnterPassword : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrangeAccent,
+                                  fontSize: 15,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins-Light"),
+                            ),
+                            margin: EdgeInsets.only(bottom: 8.5),
+                          ),
+                          buildRenterPassword(),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             build_button(),
+                             inProgress?Padding(
+                                 padding: EdgeInsets.only(left: 10),
+                                 child: CircularProgressIndicator())
+                                     : Container()
+                           ],
+                         )
+
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -148,38 +173,37 @@ class _AddressState extends State<Address> {
 
   build_mobile() {
     return TextFormField(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
-          ),
-          hintText: "Mobile",
-          labelText: "Mobile number",
-          labelStyle: const TextStyle(color: Color(0xff576630)),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(4.5),
-          ),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
-          ),
-          hintStyle: const TextStyle(color: Colors.brown)),
-      controller:mobileController,
-      cursorColor: Colors.orange,
-      style: const TextStyle(color: Colors.deepPurpleAccent),
-      validator: (phone) {
-        bool validate = validatePhone(phone!);
-        if (phone.isEmpty) {
-          return 'Please enter phone';
-        } else if (!validate) {
-          return "Enter a valid phone number";
-        }  else if (phone.length != 10) {
-          return "Enter 10 numbers";
-        }
-        return null;
-      },
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
+                ),
+                hintText: "Mobile",
+                labelText: "Mobile number",
+                labelStyle: const TextStyle(color: Color(0xff576630)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4.5),
+                ),
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
+                ),
+                hintStyle: const TextStyle(color: Colors.brown)),
+            controller:mobileController,
+            cursorColor: Colors.orange,
+            style: const TextStyle(color: Colors.deepPurpleAccent),
+            validator: (phone) {
+              bool validate = validatePhone(phone!);
+              if (phone.isEmpty) {
+                return 'Please enter phone';
+              } else if (!validate) {
+                return "Enter a valid phone number";
+              }  else if (phone.length!= 10) {
+                return "Enter 10 numbers";
+              }
+              return null;
+            },
     );
-
   }
 
   build_email() {
@@ -236,26 +260,65 @@ class _AddressState extends State<Address> {
 
   build_password() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: Container(
-        child: TextFormField(
-          style: TextStyle(fontFamily: "Poppins-Light",),
-          controller: passwordController,
-          decoration: InputDecoration(
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
-              ),
-              hintText: "Password",
-              labelText: "Password",
-              labelStyle: const TextStyle(color: Color(0xff576630)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4.5),
-              ),
-              enabledBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
-              ),
-              hintStyle: const TextStyle(color: Colors.brown)),
+        child:Stack(
+          children: [
+            TextFormField(
+              obscureText: securedValue,
+              style: TextStyle(fontFamily: "Poppins-Light",),
+              validator: (password) {
+                login_success = validate(passwordController.text);
+                if (password!.isEmpty) {
+                  return 'Please enter Password';
+                } else if (password.length < 8) {
+                  return "Please enter minimum of 8 characters";
+                } else if (!login_success) {
+                  return "Atleast alphabet and one number of 8 characters";
+                }
+              },
+              controller: passwordController,
+              decoration: InputDecoration(
+                  contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
+                  ),
+                  hintText: "Password",
+                  labelText: "Password",
+                  labelStyle: const TextStyle(color: Color(0xff576630)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4.5),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
+                  ),
+                  hintStyle: const TextStyle(color: Colors.brown)),
+            ),
+            Positioned(
+                right: 15,
+                top: 3,
+                child: TextButton(
+                  child: fab,
+                  onPressed: () {
+                    setState(() {
+                      if (securedValue && passwordController.text.isNotEmpty) {
+                        securedValue = false;
+                        fab = const Icon(
+                          Icons.visibility,
+                          color: Colors.grey,
+                        );
+                      } else {
+                        fab = const Icon(
+                          Icons.visibility_off,
+                          color: Colors.grey,
+                        );
+                        securedValue = true;
+                      }
+                    });
+                  },
+                )),
+          ],
         ),
 
       ),
@@ -263,28 +326,72 @@ class _AddressState extends State<Address> {
   }
 
   buildRenterPassword() {
-    return SizedBox(
-      height: 53,
-      width: MediaQuery.of(context).size.width/1.2,
-        child: TextFormField(
-          style: TextStyle(fontFamily: "Poppins-Light",),
-          controller: reEnterPasswordController,
-          decoration: InputDecoration(
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
-              ),
-              hintText: "Renter Password",
-              labelText: "Reenter Password",
-              labelStyle: const TextStyle(color: Color(0xff576630)),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4.5),
-              ),
-              enabledBorder: const OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
-              ),
-              hintStyle: const TextStyle(color: Colors.brown)),
+    return Stack(
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width/1.2,
+            child: TextFormField(
+              obscureText: isChecked,
+              style: TextStyle(fontFamily: "Poppins-Light",),
+              controller: reEnterPasswordController,
+              validator: (password) {
+                login_success = validate(passwordController.text);
+                if (password!.isEmpty) {
+                  return 'Please enter Password';
+                } else if (password.length < 8) {
+                  return "Please enter minimum of 8 characters";
+                } else if (passwordController.text != reEnterPasswordController.text) {
+                  return "Passwords does not match";
+                } else if (!login_success) {
+                  return "Atleast one alphabet and one number of 8 characters";
+                }
+
+                return null;
+              },
+              decoration: InputDecoration(
+                  contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
+                  ),
+                  hintText: "Renter Password",
+                  labelText: "Reenter Password",
+                  labelStyle: const TextStyle(color: Color(0xff576630)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4.5),
+                  ),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
+                  ),
+                  hintStyle: const TextStyle(color: Colors.brown)),
+            ),
+
         ),
 
+        Positioned(
+            right: 15,
+            top: 3,
+            child: TextButton(
+              child: passwordshown,
+              onPressed: () {
+                setState(() {
+                  if (isChecked && passwordController.text.isNotEmpty) {
+                    isChecked = false;
+                    passwordshown = const Icon(
+                      Icons.visibility,
+                      color: Colors.grey,
+                    );
+                  } else {
+                    passwordshown = const Icon(
+                      Icons.visibility_off,
+                      color: Colors.grey,
+                    );
+                    isChecked = true;
+                  }
+                });
+              },
+            )),
+      ],
     );
   }
   passwordField() {
@@ -297,6 +404,8 @@ class _AddressState extends State<Address> {
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 obscureText: securedValue,
                 decoration: InputDecoration(
+                    contentPadding:  EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+
                     hintText: "Enter minimum 8 characters",
                     labelText: "Password",
                     labelStyle: const TextStyle(color: Colors.brown),
@@ -353,14 +462,16 @@ class _AddressState extends State<Address> {
 
   confirmPasswordField() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12.9),
+
       child: SizedBox(
           child: Stack(
             children: [
               TextFormField(
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 obscureText: true,
+
                 decoration: InputDecoration(
+                    contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
                     hintText: "Enter minimum 8 characters",
                     labelText: "Confirm Password",
                     labelStyle: const TextStyle(color: Colors.brown),
@@ -408,29 +519,38 @@ class _AddressState extends State<Address> {
 
         ),
         onPressed: () async{
-          image = await widget.image;
 
-          Map<String,dynamic> details ={
-            "firstname":widget.firstname,
-            "lastname":widget.lastname,
-            "gender":widget.gender,
-            "dateofbirth":widget.birth_date,
-            "status":widget.married_status,
-            "fathername":widget.fathername,
-            "mothername":widget.mothername,
-            "mobilenumber":mobileController.text,
-            "email":emailController.text,
-            "address":addressController.text,
-            "password":passwordController.text,
-            "image":image
-          };
-          await FirebaseFirestore.instance.collection("Users").doc(mobileController.text).set(details);
-          Navigator.push (
-            context,
-            MaterialPageRoute (
-              builder: (BuildContext context) => LoginPage(),
-            ),
-          );
+          image = await widget.image;
+          setState(() {
+           inProgress =true;
+          });
+          if(mobileController.text!=null&&formKey.currentState!.validate()){
+            Map<String,dynamic> details ={
+              "firstname":widget.firstname,
+              "lastname":widget.lastname,
+              "gender":widget.gender,
+              "dateofbirth":widget.birth_date,
+              "status":widget.married_status,
+              "fathername":widget.fathername,
+              "mothername":widget.mothername,
+              "mobilenumber":mobileController.text,
+              "email":emailController.text,
+              "address":addressController.text,
+              "password":passwordController.text,
+              "image":image
+            };
+            await FirebaseFirestore.instance.collection("Users").doc(mobileController.text.toString()).set(details);
+            Navigator.push (
+              context,
+              MaterialPageRoute (
+                builder: (BuildContext context) => LoginPage(),
+              ),
+            );
+          }
+          else{
+            inProgress =false;
+          }
+
         },
         child: Container(
             margin: EdgeInsets.only(left: 5.3,right: 5.3,),
@@ -440,7 +560,7 @@ class _AddressState extends State<Address> {
   }
 
   validate(String password) {
-    bool passValid = RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})")
+    bool passValid = RegExp("^(?=.*[a-z])(?=.*[0-9])(?=.{8,})") //(/^[A-Z]*$/
         .hasMatch(password);
 
     if (passValid) {

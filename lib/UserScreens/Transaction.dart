@@ -23,7 +23,7 @@ class _TransactionState extends State<Transaction> {
   DateTime? end_date;
   String? dates;
   bool? pressed = false;
-
+  var formatter = NumberFormat('#,##0.' + "#" * 5);
   _TransactionState({this.phoneNumber});
 
   @override
@@ -191,11 +191,13 @@ class _TransactionState extends State<Transaction> {
         future: invest,
         builder: (context, snap) {
           if (snap.hasData && snap.requireData.exists) {
-            investAmount = snap.data;
+            DocumentSnapshot? documentSnapshot = snap.data;
+            var afterformat = formatter.format(double.parse(
+                documentSnapshot!.get("InvestAmount").replaceAll(",", "")));
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("₹ ${investAmount!.get("InvestAmount")}",
+                Text("₹ ${afterformat}",
                     style: TextStyle(
                         color: Colors.green,
                         fontWeight: FontWeight.w900,
@@ -219,7 +221,7 @@ class _TransactionState extends State<Transaction> {
         builder: (context, snap) {
           if (snap.hasData) {
             List<QueryDocumentSnapshot> userinvestments = snap.data!.docs;
-            return StreamBuilder<QuerySnapshot>(
+            return start!=null?StreamBuilder<QuerySnapshot>(
               stream: requestWithdrawls,
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
@@ -290,7 +292,7 @@ class _TransactionState extends State<Transaction> {
                 }
                 return Container();
               },
-            );
+            ):Container();
           }
           return CircularProgressIndicator();
         });

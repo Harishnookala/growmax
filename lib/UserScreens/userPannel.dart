@@ -76,7 +76,7 @@ class userPannelState extends State<userPannel> {
             selectedFontSize: 14,
             unselectedFontSize: 12.5,
             selectedLabelStyle: TextStyle(fontFamily: "Poppins-Medium"),
-            unselectedLabelStyle: TextStyle(fontFamily: "Poppins-Light"),
+            unselectedLabelStyle: TextStyle(fontFamily: "Poppins-Medium"),
 
             unselectedItemColor: Colors.grey.shade600,
             items: const [

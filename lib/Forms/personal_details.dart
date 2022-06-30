@@ -38,6 +38,8 @@ class _personal_detailsState extends State<personal_details> {
   final ImagePicker _picker = ImagePicker();
   Authentication authentication = Authentication();
   bool login_success = false;
+  final formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,153 +48,156 @@ class _personal_detailsState extends State<personal_details> {
         backgroundColor: Colors.grey.shade100,
         body: Container(
           margin: const EdgeInsets.all(12.3),
-             child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20,),
-                  Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
-                  Container(
-                      margin: EdgeInsets.all(5.3),
-                      child: Container(
-                          margin: const EdgeInsets.only(
-                              left: 6.3, ),
-                          child: const Text(
-                            "Personal Details",
-                            style: TextStyle(
-                                letterSpacing: 0.6,
-                                color: Colors.indigoAccent,
-                                fontFamily: "Poppins-Light",
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16),
-                          ))),
-                  Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
-                  Expanded(
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 16.3),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                child: const Text(
-                                  "First Name : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.8,
-                                      fontFamily: "Poppins-Light"),
+             child: Form(
+               key: formKey,
+               child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20,),
+                    Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
+                    Container(
+                        margin: EdgeInsets.all(5.3),
+                        child: Container(
+                            margin: const EdgeInsets.only(
+                                left: 6.3, ),
+                            child: const Text(
+                              "Personal Details",
+                              style: TextStyle(
+                                  letterSpacing: 0.6,
+                                  color: Colors.indigoAccent,
+                                  fontFamily: "Poppins-Light",
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16),
+                            ))),
+                    Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
+                    Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(left: 16.3),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  child: const Text(
+                                    "First Name : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.8,
+                                        fontFamily: "Poppins-Light"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5),
-                              ),
-                              build_name(),
-                              SizedBox(height: 5,),
-                              Container(
-                                child: const Text(
-                                  "Last Name : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                build_name(),
+                                SizedBox(height: 5,),
+                                Container(
+                                  child: const Text(
+                                    "Last Name : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5),
-                              ),
-                              build_Lastname(),
-                              SizedBox(height: 5,),
-                              Container(
-                                child: const Text(
-                                  "Gender : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                build_Lastname(),
+                                SizedBox(height: 5,),
+                                Container(
+                                  child: const Text(
+                                    "Gender : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5,top: 4.6),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5,top: 4.6),
-                              ),
-                              buildGender(),
-                              Container(
-                                child: const Text(
-                                  "Date of Birth : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                buildGender(),
+                                Container(
+                                  child: const Text(
+                                    "Date of Birth : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
-                              ),
-                              build_dateofbirth(),
-                              Container(
-                                child: const Text(
-                                  "Martial Status : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                build_dateofbirth(),
+                                Container(
+                                  child: const Text(
+                                    "Martial Status : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
-                              ),
-                              build_martialstatus(),
-                              Container(
-                                child: const Text(
-                                  "Father Name : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                build_martialstatus(),
+                                Container(
+                                  child: const Text(
+                                    "Father Name : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
-                              ),
-                              buildFatherName(),
-                              Container(
-                                child: const Text(
-                                  "Mother Name : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      fontSize: 15,
-                                      letterSpacing: 0.6,
-                                      fontFamily: "Poppins-Medium"),
+                                buildFatherName(),
+                                Container(
+                                  child: const Text(
+                                    "Mother Name : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        fontSize: 15,
+                                        letterSpacing: 0.6,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                                 ),
-                                margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
-                              ),
-                              buildMotherName(),
-                              SizedBox(height: 10,),
-                              Container(
-                                child: const Text(
-                                  "Profile picture : -",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.deepOrangeAccent,
-                                      letterSpacing: 0.6,
-                                      fontSize: 15,
-                                      fontFamily: "Poppins-Medium"),
+                                buildMotherName(),
+                                SizedBox(height: 10,),
+                                Container(
+                                  child: const Text(
+                                    "Profile picture : -",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.deepOrangeAccent,
+                                        letterSpacing: 0.6,
+                                        fontSize: 15,
+                                        fontFamily: "Poppins-Medium"),
+                                  ),
+                                  margin: const EdgeInsets.only(bottom: 8.5),
                                 ),
-                                margin: const EdgeInsets.only(bottom: 8.5),
-                              ),
-                              SizedBox(height: 20,),
-                              Center(child:buildPanPhoto() ,),
-                              build_button()
-                            ],
+                                SizedBox(height: 20,),
+                                Center(child:buildPanPhoto() ,),
+                                build_button()
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+             ),
 
 
         ),
@@ -206,6 +211,12 @@ class _personal_detailsState extends State<personal_details> {
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (name){
+          if(name==null||name.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
         controller: nameController,
         decoration: InputDecoration(
             focusedBorder: const OutlineInputBorder(
@@ -526,20 +537,21 @@ class _personal_detailsState extends State<personal_details> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.6)),
         ),
         onPressed: (){
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) =>
-                Address(firstname:nameController.text,
-                    lastname:lastNameContoller.text,
-                    gender: selected_value,
-                    birth_date:date,
-                    married_status:status,
-                    fathername:fatherNameContoller.text,
-                    mothername:motherNameContoller.text,
-                    image :image,
-                )),
-          );
-
+          print(image);
+           if(image!=null&&nameController.text!=null&&selected_value!=null&&formKey.currentState!.validate())
+             Navigator.push(
+               context,
+               MaterialPageRoute(builder: (context) =>
+                   Address(firstname:nameController.text,
+                     lastname:lastNameContoller.text,
+                     gender: selected_value,
+                     birth_date:date,
+                     married_status:status,
+                     fathername:fatherNameContoller.text,
+                     mothername:motherNameContoller.text,
+                     image :image,
+                   )),
+             );
           },
         child: Container(
           width: 120,
@@ -584,7 +596,7 @@ class _personal_detailsState extends State<personal_details> {
                 style: TextButton.styleFrom(backgroundColor: Colors.purple.shade400),
                 onPressed: (){
                   get_permissions();
-                },child: Text("Upload Pan",style: TextStyle(color: Colors.white),)),
+                },child: Text("Upload Profile",style: TextStyle(color: Colors.white),)),
           )
         ],
       ),

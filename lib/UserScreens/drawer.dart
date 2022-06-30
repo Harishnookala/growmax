@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:growmax/Login.dart';
 import 'package:growmax/UserScreens/pending_requests.dart';
+import 'package:growmax/UserScreens/shownominee_details.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Forms/nominee_details.dart';
 
@@ -45,7 +48,7 @@ class _drawerState extends State<drawer> {
                     FutureBuilder<DocumentSnapshot>(
                       future: users,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData) {
+                        if (snapshot.hasData&&snapshot.requireData.exists) {
                           var users = snapshot.data!;
                           return Text(
                             users.get("firstname"),
@@ -84,11 +87,19 @@ class _drawerState extends State<drawer> {
                           padding: EdgeInsets.only(bottom: 12.3, top: 12.3),
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                   Nominee_details(phonenumber: widget.phonenumber,)));
-                        },
+                        onPressed: () async{
+                         var details =  await FirebaseFirestore.instance.collection("nominee_details").doc(widget.phonenumber).get();
+                          if(details.exists){
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    shownnominee(phonenumber: widget.phonenumber,)));
+                          }
+                          else{
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    Nominee_details(phonenumber: widget.phonenumber,)));
+                          }
+                         },
                         child: Text(
                           "Nominee Details",
                           style: TextStyle(
@@ -114,6 +125,28 @@ class _drawerState extends State<drawer> {
                                   fontFamily: "Poppins-Medium"),
                             )),
                       ],
+                    ),
+                    SizedBox(height: 30,),
+                    Container(
+                      margin: EdgeInsets.only(left: 15.3),
+                      child: TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.orange.shade400,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.3)),
+                            minimumSize: Size(120, 30)
+                          ),
+                          onPressed: () async {
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                             print(prefs.get("phonenumber"));
+                            await prefs.clear();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage()),
+                            );
+                          }, child: Text("Log Out",style:
+                      TextStyle(color: Colors.white,fontSize: 16,
+                          fontFamily: "Poppins-Medium"),)),
                     )
                   ],
                 )

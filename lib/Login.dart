@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:growmax/UserScreens/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Forms/personal_details.dart';
 import 'UserScreens/userPannel.dart';
@@ -24,7 +25,8 @@ class _LoginPageState extends State<LoginPage> {
   String errorMessage = "";
   bool error = false;
   User? user;
-  var valid;
+  SharedPreferences? prefsdata;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -78,9 +80,13 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 20),
                         child: TextField(
-                          style: Theme.of(context).textTheme.caption,
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade600,
+                              fontFamily: "Poppins-Medium"),
                           controller: _otp,
                           decoration: new InputDecoration(
+
                             labelText: "OTP",
                             focusedBorder: UnderlineInputBorder(
                                 borderSide: BorderSide(color: Colors.black)),
@@ -92,27 +98,24 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                     GestureDetector(
                       onTap: () async {
+                        prefsdata = await SharedPreferences.getInstance();
+
                         setState(() {
                           errorMessage = "";
                           error = false;
                         });
+                        var valid;
 
-                        CollectionReference users =
-                        await FirebaseFirestore.instance.collection('Users');
-                        QuerySnapshot query = await users.get();
-                        if(query.docs.length>0){
-                        for(int i =0;i<query.docs.length;i++){
-                          if(query.docs[i].get("mobilenumber")==_mobile.text){
-                            valid = _mobile.text;
-                          }
-                          else{
-                            valid = null;
-                          }
-                        }
-                        }
+                        var users = await FirebaseFirestore.instance.collection("Users").doc(_mobile.text).get();
+
+                        if(users.exists){
+                          valid = users.get("mobilenumber");
+                         }
                         else{
                           valid = null;
                         }
+                      print(valid);
+
                         FirebaseAuth auth = FirebaseAuth.instance;
                         if (phoneValidator(_mobile.text) != null) {
                           setState(() {
@@ -122,6 +125,7 @@ class _LoginPageState extends State<LoginPage> {
                           return;
                         }
                         else if(valid==null){
+
                           setState(() {
                             errorMessage = "User is not registered";
                             error = true;
@@ -138,6 +142,8 @@ class _LoginPageState extends State<LoginPage> {
                             verificationCompleted: (PhoneAuthCredential credential) async {
                               await auth.signInWithCredential(credential).then((value) async {
                                 if (value.user!.providerData[0].phoneNumber != null) {
+                                  prefsdata!.setString('phonenumber', _mobile.text);
+
                                   return Navigator.of(context).pushReplacement(
                                        MaterialPageRoute(
                                           builder: (BuildContext context) {

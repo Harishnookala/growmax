@@ -19,6 +19,7 @@ class _Nominee_detailsState extends State<Nominee_details> {
   TextEditingController relationController = TextEditingController();
   TextEditingController fathernameController = TextEditingController();
   TextEditingController mothernameController = TextEditingController();
+
   final formKey = GlobalKey<FormState>();
   void initState() {
     super.initState();
@@ -255,6 +256,7 @@ class _Nominee_detailsState extends State<Nominee_details> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.6)),
         ),
         onPressed: () async {
+
           if (formKey.currentState!.validate()) {
             Map<String,dynamic>data ={
               "Name":nameController.text,

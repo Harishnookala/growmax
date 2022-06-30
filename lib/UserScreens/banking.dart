@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:growmax/Forms/edit_bankdetails.dart';
  class Banking extends StatefulWidget {
    String?phoneNumber;
     Banking({this.phoneNumber});
@@ -14,6 +16,7 @@ import 'package:flutter/material.dart';
    @override
    Widget build(BuildContext context) {
      var bank_details = FirebaseFirestore.instance.collection("bank_details").doc(widget.phoneNumber).get();
+     var id;
      return Column(
        children: [
          SizedBox(height: 30,),
@@ -33,6 +36,7 @@ import 'package:flutter/material.dart';
                  builder:(context,snapshot){
                  if(snapshot.hasData&&snapshot.requireData.exists){
                    var details = snapshot.data;
+                    id = snapshot.data!.id;
                    return details!.get("status")=="Accept"?Container(
                      child: ListView(
                        shrinkWrap: true,
@@ -68,7 +72,22 @@ import 'package:flutter/material.dart';
                            ),
                          ),
                          SizedBox(height: 15,),
-
+                         Center(
+                           child: TextButton(
+                               style: TextButton.styleFrom(
+                                   minimumSize: const Size(120, 20),
+                                   backgroundColor: Colors.limeAccent,
+                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.3))
+                               ),
+                               onPressed: (){
+                                 Navigator.push (
+                                   context,
+                                   MaterialPageRoute (
+                                     builder: (BuildContext context) => edit_details(id: id,Accountnumber:details.get("accountnumber"),ifsc:details.get("ifsc")),
+                                   ),
+                                 );
+                               }, child: const Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15,fontWeight: FontWeight.w600),)),
+                         )
                        ],
                      ),
                    ):Container();
@@ -78,15 +97,7 @@ import 'package:flutter/material.dart';
              const SizedBox(
                height: 20,
              ),
-             Center(
-               child: TextButton(
-                   style: TextButton.styleFrom(
-                     minimumSize: const Size(120, 20),
-                     backgroundColor: Colors.limeAccent,
-                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.3))
-                   ),
-                   onPressed: (){}, child: const Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15,fontWeight: FontWeight.w600),)),
-             )
+          
            ],
          ),
          )

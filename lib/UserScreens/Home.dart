@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
+import 'package:get/get.dart';
 import 'package:growmax/UserScreens/withdraw.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Forms/bank_details.dart';
 import 'Investment.dart';
 
@@ -16,7 +18,12 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String? phoneNumber;
+  bool? pressed = false;
+  SharedPreferences? prefsdata;
+  SharedPreferences? prefs;
+  var data;
   _HomeState({this.phoneNumber});
+  var formatter = NumberFormat('#,##0.' + "#" * 5);
   @override
   Widget build(BuildContext context) {
     var dates = DateFormat('yyy-dd-MMM').format(DateTime.now());
@@ -24,10 +31,17 @@ class _HomeState extends State<Home> {
         .collection("Investments")
         .doc(phoneNumber)
         .get();
-    var profit = FirebaseFirestore.instance.collection("Admin").doc(dates).get();
-    var gains = FirebaseFirestore.instance.collection("currentgains").doc(phoneNumber).get();
+    var profit =
+        FirebaseFirestore.instance.collection("Admin").doc(dates).get();
     var users = FirebaseFirestore.instance.collection("Users").get();
-    var bank_details = FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
+    var bank_details = FirebaseFirestore.instance
+        .collection("bank_details")
+        .doc(phoneNumber)
+        .get();
+    var gains = FirebaseFirestore.instance
+        .collection("Current_gains")
+        .doc(phoneNumber)
+        .get();
 
     var investAmount;
     return Container(
@@ -75,51 +89,59 @@ class _HomeState extends State<Home> {
                                         children: [
                                           Container(
                                             margin: const EdgeInsets.only(
-                                                left: 12.3, top: 6.3,right: 12.3),
+                                                left: 12.3,
+                                                top: 6.3,
+                                                right: 12.3),
                                             child: Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment
                                                       .spaceBetween,
                                               children: [
                                                 Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      "Welcome " + '${users.docs[index].get("firstname")}',
+                                                      "Welcome " +
+                                                          '${users.docs[index].get("firstname")}',
                                                       style: const TextStyle(
-                                                          color: Colors.deepOrange,
-                                                        fontSize: 15,
-                                                        fontFamily: "Poppins-Medium"
-
-                                                      ),
+                                                          color:
+                                                              Colors.deepOrange,
+                                                          fontSize: 15,
+                                                          fontFamily:
+                                                              "Poppins-Medium"),
                                                     ),
                                                     Container(
-                                                      margin: const EdgeInsets.only(
-                                                        top: 1.0),
-                                                      width: MediaQuery.of(context).size.width/1.9,
-                                                      child:  const Text(
+                                                      margin:
+                                                          const EdgeInsets.only(
+                                                              top: 1.0),
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width /
+                                                              1.9,
+                                                      child: const Text(
                                                         "This is the way to build your Future",
                                                         style: TextStyle(
                                                             fontSize: 13,
                                                             color: Colors.grey,
-                                                            fontFamily: "Poppins-Medium"),
+                                                            fontFamily:
+                                                                "Poppins-Medium"),
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                                 ProfilePicture(
-                                                  name:
-                                                  users.docs[index].get("lastname"),
+                                                  name: users.docs[index]
+                                                      .get("lastname"),
                                                   radius: 38,
                                                   fontsize: 16,
-                                                  img:users.docs[index].get("image"),
+                                                  img: users.docs[index]
+                                                      .get("image"),
                                                 )
-
                                               ],
                                             ),
                                           ),
-
-
                                         ],
                                       )
                                     : Container();
@@ -128,7 +150,13 @@ class _HomeState extends State<Home> {
                             ),
                           );
                         }
-                        return Container();
+                        return Container(
+                          margin: EdgeInsets.only(top: 16.3),
+                          child: Text(
+                            "Welcome",
+                            style: TextStyle(color: Colors.deepOrange),
+                          ),
+                        );
                       },
                     )
                   ],
@@ -147,7 +175,7 @@ class _HomeState extends State<Home> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: Colors.green.shade400,
+                color: Colors.green.shade400,
                 border: Border.all(color: Colors.lime.shade700),
                 borderRadius: BorderRadius.circular(12.3)),
             margin: EdgeInsets.only(left: 18.3, right: 18.3),
@@ -159,7 +187,11 @@ class _HomeState extends State<Home> {
                   margin: const EdgeInsets.only(top: 12.3, left: 13.3),
                   child: const Text(
                     "Today Portfolio Value : -  ",
-                    style: TextStyle(color: Colors.white, fontWeight:FontWeight.w500,fontSize: 15,fontFamily: "Poppins-Medium"),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        fontFamily: "Poppins-Medium"),
                   ),
                 ),
                 Container(
@@ -204,118 +236,197 @@ class _HomeState extends State<Home> {
           const SizedBox(
             height: 20,
           ),
-         FutureBuilder<DocumentSnapshot>(
-           future:bank_details ,
-           builder: (context,snapshot){
-             if(snapshot.hasData ){
-               var data = snapshot.data;
-               return data!.get("status")=="pending"?Container(
-                 child: Center(child: Text("---------Your request was Pending -------",style: TextStyle(color: Colors.pinkAccent),),),
-               ):data.get("status")=="Accept"?Container(
-                 child: SizedBox(
-                   child: Container(
-                     margin: EdgeInsets.only(left: 12.3, right: 12.3),
-                     child: Column(
-                       children: [
-                         const SizedBox(
-                           height: 20,
-                         ),
-                         get_currentGains(investments, investAmount, gains),
-                         SizedBox(
-                           height: 30,
-                         ),
-                         Center(
-                           child: Row(
-                             mainAxisAlignment: MainAxisAlignment.spaceAround,
-                             crossAxisAlignment: CrossAxisAlignment.center,
-                             children: [
-                               TextButton(
-                                   style: TextButton.styleFrom(
-                                       minimumSize: Size(120, 40),
-                                       elevation: 0.2,
-                                       shape: RoundedRectangleBorder(
-                                           borderRadius: BorderRadius.circular(6.6)),
-                                       backgroundColor: Colors.grey.shade700),
-                                   onPressed: () {
-                                     Navigator.push(
-                                       context,
-                                       MaterialPageRoute(
-                                           builder: (context) => withdraw(
-                                             phonenumber: phoneNumber,
-                                           )),
-                                     );
-                                   },
-                                   child: const Text(
-                                     "Withdrawl",
-                                     style: TextStyle(
-                                         color: Colors.white,
-                                         letterSpacing: 0.6,
-                                         fontSize: 15,
-                                         fontWeight: FontWeight.w900),
-                                   )),
-                               TextButton(
-                                   style: TextButton.styleFrom(
-                                       elevation: 0.5,
-                                       shadowColor: Colors.red,
-                                       minimumSize: Size(120, 40),
-                                       backgroundColor: Colors.green,
-                                       shape: RoundedRectangleBorder(
-                                           borderRadius:
-                                           BorderRadius.circular(6.6))),
-                                   onPressed: () {
-                                     Navigator.push(
-                                       context,
-                                       MaterialPageRoute(
-                                           builder: (context) => Investment(
-                                             phonenumber: phoneNumber,
-                                           )),
-                                     );
-                                   },
-                                   child: const Text(
-                                     " + Invest More",
-                                     style: TextStyle(
-                                         color: Colors.white,
-                                         letterSpacing: 0.6,
-                                         fontSize: 15,
-                                         fontWeight: FontWeight.w900),
-                                   ))
-                             ],
-                           ),
-                         )
-                       ],
-                     ),
-                   ),
-                 ),
-               ):Text("Your request is rejected");
-             }
-             else{
-               return Center(
-                 child: SizedBox(
-                   width: 180,
-                   child: TextButton(
-                     style: TextButton.styleFrom(
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(26.0)),
-                       backgroundColor: Colors.green,
-                       elevation: 0.6,
+          FutureBuilder<DocumentSnapshot>(
+              future: bank_details,
+              builder: (context, snapshot) {
+                if (snapshot.hasData && snapshot.requireData.exists) {
+                  var data = snapshot.data;
+                  print(data);
+                  return data!.get("status") == "pending"
+                      ? Container(
+                          child: Center(
+                            child: Text(
+                              " ---------Your bank details is Pending ------- ",
+                              style: TextStyle(color: Colors.pinkAccent),
+                            ),
+                          ),
+                        )
+                      : data.get("status") == "Accept"
+                          ? Container(
+                              child: SizedBox(
+                                child: Container(
+                                  margin:
+                                      EdgeInsets.only(left: 12.3, right: 12.3),
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(
+                                        height: 20,
+                                      ),
+                                      get_currentGains(
+                                          investments, investAmount, gains),
+                                      SizedBox(
+                                        height: 30,
+                                      ),
+                                      Center(
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            TextButton(
+                                                style: TextButton.styleFrom(
+                                                    minimumSize: Size(120, 40),
+                                                    elevation: 0.2,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6.6)),
+                                                    backgroundColor:
+                                                        Colors.grey.shade700),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            withdraw(
+                                                              phonenumber:
+                                                                  phoneNumber,
+                                                            )),
+                                                  );
+                                                },
+                                                child: const Text(
+                                                  "Withdrawl",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.6,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w900),
+                                                )),
+                                            TextButton(
+                                                style: TextButton.styleFrom(
+                                                    elevation: 0.5,
+                                                    shadowColor: Colors.red,
+                                                    minimumSize: Size(120, 40),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        6.6))),
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Investment(
+                                                              phonenumber:
+                                                                  phoneNumber,
+                                                            )),
+                                                  );
+                                                },
+                                                child: const Text(
+                                                  " + Invest More",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      letterSpacing: 0.6,
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w900),
+                                                ))
+                                          ],
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          : data.get("status") == "Reject"
+                              ? Column(
+                                  children: [
+                                    Center(
+                                        child: Text(
+                                      "------ Your bank details  is Rejected so  ------",
+                                      style: TextStyle(color: Colors.red),
+                                    )),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Center(
+                                      child: SizedBox(
+                                        width: 180,
+                                        child: TextButton(
+                                          style: TextButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        26.0)),
+                                            backgroundColor: Colors.green,
+                                            elevation: 0.6,
+                                          ),
+                                          onPressed: () async {
+                                            //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
 
-                     ),
-                     onPressed: (){
-                       Navigator.push(
-                         context,
-                         MaterialPageRoute(
-                             builder: (context) => BankAccount(
-                               phonenumber: phoneNumber,
-                             )),
-                       );
-                     },
-                     child: Text(" + Add Bank Details",
-                       style: TextStyle(color: Colors.white),),
-                   ),),
-               );
-             }
-             return Container();
-           },
-         )
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      BankAccount(
+                                                        phonenumber:
+                                                            phoneNumber,
+                                                      )),
+                                            );
+                                          },
+                                          child: Text(
+                                            " + Add Bank Details",
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )
+                              : Container();
+                } else {
+                  return Center(
+                    child: SizedBox(
+                      width: 180,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26.0)),
+                          backgroundColor: Colors.green,
+                          elevation: 0.6,
+                        ),
+                        onPressed: () async {
+                          //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => BankAccount(
+                                      phonenumber: phoneNumber,
+                                    )),
+                          );
+                        },
+                        child: Text(
+                          " + Add Bank Details",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return Center(child: CircularProgressIndicator());
+              })
         ],
       ),
     );
@@ -327,11 +438,18 @@ class _HomeState extends State<Home> {
       builder: (context, snap) {
         if (snap.hasData && snap.requireData.exists) {
           investAmount = snap.data;
+          DocumentSnapshot? documentSnapshot = snap.data;
+          var aafterformat = formatter.format(double.parse(
+              documentSnapshot!.get("InvestAmount").replaceAll(",", "")));
+
           return Row(
             children: [
-              Text(
-                "₹ ${investAmount!.get("InvestAmount")}",
-        style: const TextStyle(color: Colors.white, fontWeight:FontWeight.w900,fontSize: 16,fontFamily: "Poppins-Medium")),
+              Text("₹ ${aafterformat}",
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      fontFamily: "Poppins-Medium")),
             ],
           );
         }
@@ -362,10 +480,12 @@ class _HomeState extends State<Home> {
                       style: TextStyle(
                           color: Colors.red, letterSpacing: 1.3, fontSize: 16),
                     )
-                  : Text(
-                      "+$Todayprofit" + "%",
-                  style: TextStyle(color: Colors.white, fontWeight:FontWeight.w500,fontSize: 15,fontFamily: "Poppins-Medium")
-                    )
+                  : Text("+$Todayprofit" + "%",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                          fontFamily: "Poppins-Medium"))
             ],
           );
         }
@@ -374,28 +494,27 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Current_gains(Future<DocumentSnapshot<Map<String, dynamic>>> investments,
-      Future<DocumentSnapshot<Map<String, dynamic>>> gains) {
+  Current_gains(gains) {
     return Column(
       children: [
         FutureBuilder<DocumentSnapshot>(
             future: gains,
             builder: (context, snap) {
               if (snap.hasData && snap.requireData.exists) {
-                var current_gains = snap.data;
+                var profit = snap.data;
                 return Center(
                   child: Container(
                       margin: EdgeInsets.only(bottom: 5.3),
                       child: Center(
                           child: Text(
-                            "₹ " + current_gains!.get("CurrentGains"),
-                            style: TextStyle(
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: "Poppins-Medium",
-                                fontSize: 16),
-                          ))),
-                ); 
+                        "₹ " + profit!.get("CurrentGains"),
+                        style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Poppins-Medium",
+                            fontSize: 16),
+                      ))),
+                );
               }
               return Container();
             })
@@ -405,10 +524,11 @@ class _HomeState extends State<Home> {
 
   get_InvestAmount(Future<DocumentSnapshot<Map<String, dynamic>>> investments,
       investAmount) {
+    print(MediaQuery.of(context).size.width / 2.58);
     return Container(
       margin: const EdgeInsets.only(left: 12.3),
       decoration: BoxDecoration(
-        color: Colors.green.shade200,
+          color: Colors.green.shade200,
           border: Border.all(color: Colors.white),
           borderRadius: BorderRadius.circular(5.3)),
       child: Column(
@@ -416,13 +536,21 @@ class _HomeState extends State<Home> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-              width: 130,
+              width: MediaQuery.of(context).size.width / 2.58,
               margin: const EdgeInsets.only(
                   top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
-              child: const Center(
-                  child: Text("Invested Amount",
-                      style: TextStyle(
-                          color: Colors.deepOrange, fontWeight: FontWeight.bold,fontFamily: "Poppins-Medium")))),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                      child: Text("Invested Amount",
+                          style: TextStyle(
+                              color: Colors.deepOrange,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: "Poppins-Medium"))),
+                ],
+              )),
           const SizedBox(
             height: 5,
           ),
@@ -441,15 +569,18 @@ class _HomeState extends State<Home> {
     );
   }
 
-  get_currentGains(Future<DocumentSnapshot<Map<String, dynamic>>> investments,
-      investAmount, Future<DocumentSnapshot<Map<String, dynamic>>> profit) {
+  get_currentGains(
+    Future<DocumentSnapshot<Map<String, dynamic>>> investments,
+    investAmount,
+    Future<DocumentSnapshot<Map<String, dynamic>>> gains,
+  ) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         get_InvestAmount(investments, investAmount),
         Container(
-          margin: EdgeInsets.only(left: 12.3),
+          margin: EdgeInsets.only(left: 12.3, right: 12.3),
           decoration: BoxDecoration(
               border: Border.all(color: Colors.brown),
               borderRadius: BorderRadius.circular(5.3)),
@@ -458,7 +589,7 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                  width: 130,
+                  width: MediaQuery.of(context).size.width / 3,
                   margin: const EdgeInsets.only(
                       top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
                   child: const Center(
@@ -470,7 +601,7 @@ class _HomeState extends State<Home> {
               const SizedBox(
                 height: 5,
               ),
-              Current_gains(investments, profit),
+              Current_gains(gains),
             ],
           ),
         ),
@@ -499,8 +630,4 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-
-
-
 }

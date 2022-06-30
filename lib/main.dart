@@ -1,13 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:growmax/Forms/Address.dart';
 import 'package:growmax/Forms/nominee_details.dart';
+import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/splash_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Login.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var token = prefs.getString('phonenumber');
+  runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: token==null?SplashScreen():userPannel(phoneNumber: token,)));
 }
 
 class MyApp extends StatelessWidget {
@@ -23,7 +30,7 @@ class MyApp extends StatelessWidget {
 
           primarySwatch: Colors.blue,
         ),
-        home:SplashScreen ()
+        home:SplashScreen()
     );
   }
 }
