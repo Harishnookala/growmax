@@ -137,19 +137,23 @@ class _TransactionState extends State<Transaction> {
                         ),
                       ],
                     ),
-                    Center(
-                      child: TextButton(
-                          style: TextButton.styleFrom(
-                              backgroundColor: Colors.blueGrey),
-                          onPressed: () {
-                            setState(() {
-                              pressed = true;
-                            });
-                          },
-                          child: Text(
-                            "Submit",
-                            style: TextStyle(color: Colors.white),
-                          )),
+                    Container(
+                      margin: EdgeInsets.only(top: 12.3),
+                      child: Center(
+                        child: TextButton(
+                            style: TextButton.styleFrom(
+                              minimumSize: Size(110, 40),
+                                backgroundColor: Colors.blueGrey.shade500),
+                            onPressed: () {
+                              setState(() {
+                                pressed = true;
+                              });
+                            },
+                            child: Text(
+                              "Submit",
+                              style: TextStyle(color: Colors.white,fontFamily: "Poppins-Medium",fontSize: 15 ),
+                            )),
+                      ),
                     )
                   ],
                 ),

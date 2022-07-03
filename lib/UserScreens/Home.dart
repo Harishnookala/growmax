@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
@@ -24,6 +26,22 @@ class _HomeState extends State<Home> {
   var data;
   _HomeState({this.phoneNumber});
   var formatter = NumberFormat('#,##0.' + "#" * 5);
+
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(Duration(seconds: 15),(timer) {
+
+    },);
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     var dates = DateFormat('yyy-dd-MMM').format(DateTime.now());
@@ -52,26 +70,28 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(
-                height: 8,
-              ),
+
               Container(
+              margin: EdgeInsets.only(top: 8.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Builder(builder: (context) {
-                      return IconButton(
-                        icon: const Icon(
-                          Icons.menu,
-                          size: 32,
-                          color: Colors.lightBlueAccent,
-                        ),
-                        onPressed: () {
-                          Scaffold.of(context).openDrawer();
-                        },
-                      );
-                    }),
+                    Container(
+
+                      child: Builder(builder: (context) {
+                        return IconButton(
+                          icon: const Icon(
+                            Icons.menu,
+                            size: 32,
+                            color: Colors.lightBlueAccent,
+                          ),
+                          onPressed: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                        );
+                      }),
+                    ),
                     FutureBuilder<QuerySnapshot>(
                       future: users,
                       builder: (context, snapshot) {
@@ -90,7 +110,6 @@ class _HomeState extends State<Home> {
                                           Container(
                                             margin: const EdgeInsets.only(
                                                 left: 12.3,
-                                                top: 6.3,
                                                 right: 12.3),
                                             child: Row(
                                               mainAxisAlignment:
@@ -101,15 +120,18 @@ class _HomeState extends State<Home> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
-                                                      "Welcome " +
-                                                          '${users.docs[index].get("firstname")}',
-                                                      style: const TextStyle(
-                                                          color:
-                                                              Colors.deepOrange,
-                                                          fontSize: 15,
-                                                          fontFamily:
-                                                              "Poppins-Medium"),
+                                                    Container(
+                                                      margin: const EdgeInsets.only(top: 6.0),
+                                                      child: Text(
+                                                        "Welcome " +
+                                                            '${users.docs[index].get("firstname")}',
+                                                        style: const TextStyle(
+                                                            color:
+                                                                Colors.deepOrange,
+                                                            fontSize: 15,
+                                                            fontFamily:
+                                                                "Poppins-Medium"),
+                                                      ),
                                                     ),
                                                     Container(
                                                       margin:
@@ -151,7 +173,7 @@ class _HomeState extends State<Home> {
                           );
                         }
                         return Container(
-                          margin: EdgeInsets.only(top: 16.3),
+                         margin: EdgeInsets.only(top: 12.3),
                           child: Text(
                             "Welcome",
                             style: TextStyle(color: Colors.deepOrange),
@@ -371,7 +393,6 @@ class _HomeState extends State<Home> {
                                             elevation: 0.6,
                                           ),
                                           onPressed: () async {
-                                            //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
 
                                             Navigator.push(
                                               context,
@@ -396,31 +417,67 @@ class _HomeState extends State<Home> {
                               : Container();
                 } else {
                   return Center(
-                    child: SizedBox(
-                      width: 180,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(26.0)),
-                          backgroundColor: Colors.green,
-                          elevation: 0.6,
-                        ),
-                        onPressed: () async {
-                          //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
+                    child: FutureBuilder<DocumentSnapshot>(
+                      future: bank_details,
+                      builder: (context,snapshot){
+                        if(snapshot.hasData&&snapshot.requireData.exists){
+                          return Container(
+                           child: SizedBox(
+                            width: 180,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26.0)),
+                                backgroundColor: Colors.green,
+                                elevation: 0.6,
+                              ),
+                              onPressed: () async {
+                                //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
 
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => BankAccount(
-                                      phonenumber: phoneNumber,
-                                    )),
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BankAccount(
+                                        phonenumber: phoneNumber,
+                                      )),
+                                );
+                              },
+                              child: Text(
+                                " + Add Bank Details",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
                           );
-                        },
-                        child: Text(
-                          " + Add Bank Details",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
+                        }  return Container(
+                          child: SizedBox(
+                            width: 180,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26.0)),
+                                backgroundColor: Colors.green,
+                                elevation: 0.6,
+                              ),
+                              onPressed: () async {
+                                //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BankAccount(
+                                        phonenumber: phoneNumber,
+                                      )),
+                                );
+                              },
+                              child: Text(
+                                " + Add Bank Details",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 }
@@ -428,6 +485,7 @@ class _HomeState extends State<Home> {
                 return Center(child: CircularProgressIndicator());
               })
         ],
+
       ),
     );
   }
@@ -441,7 +499,6 @@ class _HomeState extends State<Home> {
           DocumentSnapshot? documentSnapshot = snap.data;
           var aafterformat = formatter.format(double.parse(
               documentSnapshot!.get("InvestAmount").replaceAll(",", "")));
-
           return Row(
             children: [
               Text("₹ ${aafterformat}",
@@ -465,7 +522,7 @@ class _HomeState extends State<Home> {
         if (snap.hasData && snap.requireData.exists) {
           var investment = snap.data;
           var Todayprofit = investment!.get("Todayprofit");
-          int profit = int.parse(Todayprofit);
+          double profit = double.parse(Todayprofit);
 
           return Row(
             children: [
@@ -476,11 +533,11 @@ class _HomeState extends State<Home> {
                       color: Colors.white, size: 20),
               profit.isNegative
                   ? Text(
-                      Todayprofit + "%",
+                      Todayprofit.toString() + "%",
                       style: TextStyle(
                           color: Colors.red, letterSpacing: 1.3, fontSize: 16),
                     )
-                  : Text("+$Todayprofit" + "%",
+                  : Text(Todayprofit.toString() + "%",
                       style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,

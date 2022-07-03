@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
@@ -16,18 +15,17 @@ class _withdrawState extends State<withdraw> {
   TextEditingController debitController = TextEditingController();
   String? phonenumber;
   int? Investments;
-
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
-
+   bool inprogress = false;
   _withdrawState({this.phonenumber});
   @override
   Widget build(BuildContext context) {
+    DocumentSnapshot<Object?>?amount;
     var balance = FirebaseFirestore.instance
         .collection("Investments")
         .doc(phonenumber)
         .get();
-    DocumentSnapshot<Object?>?amount;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -61,6 +59,8 @@ class _withdrawState extends State<withdraw> {
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.requireData.exists) {
                            amount = snapshot.data;
+                           amount!.get("InvestAmount");
+                          print(amount.toString());
                           return Text(
                             amount!.get("InvestAmount"),
                             style: const TextStyle(
@@ -75,13 +75,13 @@ class _withdrawState extends State<withdraw> {
 
                       },
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     Container(
                       margin: EdgeInsets.only(left: 16.3, bottom: 5.3),
                       alignment: Alignment.topLeft,
-                      child: Text(
+                      child: const Text(
                         "Withdrawl Amount",
                         style: TextStyle(color: Colors.deepOrange),
                       ),
@@ -129,53 +129,60 @@ class _withdrawState extends State<withdraw> {
                              ),
                            ),
                          ),
-                         TextButton(
-                           style: TextButton.styleFrom(
-                               minimumSize: const Size(80, 30),
-                               backgroundColor: Colors.deepOrange),
-                           onPressed: () async {
-                             setState(() {
-                               var investamount = double.parse(amount!.get("InvestAmount"));
-                               var debit = double.parse(debitController.text);
-                               if(investamount>=debit){
-                                 pressed = true;
-                                 print(pressed);
-                               }
-                               else{
-                                 pressed =false;
-                               }
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.center,
+                           children: [
+                             TextButton(
+                               style: TextButton.styleFrom(
+                                   minimumSize: const Size(140, 40),
+                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
+                                   backgroundColor: Colors.deepOrange.shade400),
+                               onPressed: () async {
+                                 setState(() {
+                                   var investamount = double.parse(amount!.get("InvestAmount"));
+                                   var debit = double.parse(debitController.text);
+                                   if(investamount>=debit){
+                                     pressed = true;
+                                     inprogress =true;
+                                   }
+                                   else if(investamount<debit){
+                                     pressed =false;
+                                     inprogress =false;
+                                   }
 
-                             });
-                             if(formKey.currentState!.validate()){
-                               print(debitController.text);
-                               Map<String, dynamic> data = {
-                                 "phonenumber": phonenumber,
-                                 "InvestAmount": debitController.text.toString(),
-                                 "CreatedAt": DateTime.now(),
-                                 "status": "pending",
-                                 "Type" : "Debit",
-                               };
-                               await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
-                               Navigator.push(
-                                 context,
-                                 MaterialPageRoute(
-                                     builder: (context) => userPannel(
-                                       phoneNumber: phonenumber,
-                                     )),
-                               );
-                             }
+                                 });
 
-                           },
+                                 if(formKey.currentState!.validate()&&pressed){
+                                   Map<String, dynamic> data = {
+                                     "phonenumber": phonenumber,
+                                     "InvestAmount": debitController.text.toString(),
+                                     "CreatedAt": DateTime.now(),
+                                     "status": "pending",
+                                     "Type" : "Debit",
+                                   };
+                                   await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
+                                   Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                       builder: (BuildContext context) =>
+                                           userPannel(phoneNumber: widget.phonenumber,)));
+                                 }
 
-                           child:  Text(
-                             "Withdraw",
-                             style: TextStyle(color: Colors.white),
-                           ),
+                               },
+
+                               child:  const Text(
+                                 "Withdraw",
+                                 style: TextStyle(color: Colors.white),
+                               ),
+                             ),
+                             inprogress?const Padding(
+                                 padding: EdgeInsets.only(left: 10),
+                                 child: CircularProgressIndicator())
+                                 : Container()
+                           ],
                          ),
                        ],
                      ),
-                   )
-
+                   ),
+                    pressed==false?Text("Available amount is greater than Debit Amount",style: TextStyle(color: Colors.red),):Text("")
                   ],
                 )),
           ],

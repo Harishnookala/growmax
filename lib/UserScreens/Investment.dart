@@ -16,7 +16,7 @@ class InvestmentState extends State<Investment> {
   TextEditingController creditController = TextEditingController();
   String? phonenumber;
   int? Investments;
-
+  bool inprogress = false;
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
 
@@ -75,7 +75,7 @@ class InvestmentState extends State<Investment> {
 
                       },
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     Container(
@@ -129,20 +129,39 @@ class InvestmentState extends State<Investment> {
                               ),
                             ),
                           ),
-                          TextButton(
-                            style: TextButton.styleFrom(
-                                minimumSize: const Size(140, 40),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
-                                backgroundColor: Colors.deepOrange.shade400),
-                            onPressed: () async {
-                              if(formKey.currentState!.validate()){
-                                get_data();
-                              }
-                            },
+                          Container(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                      minimumSize: const Size(130, 40),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
+                                      backgroundColor: Colors.deepOrange.shade400),
+                                  onPressed: () async {
+                                    setState((){
+                                      inprogress =true;
+                                    });
+                                    if(formKey.currentState!.validate()){
 
-                            child:  Text(
-                              "Invest",
-                              style: TextStyle(color: Colors.white,fontSize: 15,fontFamily: "Poppins-Medium"),
+                                      get_data();
+                                    }
+                                    else{
+                                      inprogress =true;
+                                    }
+                                  },
+
+                                  child: const Text(
+                                    "Invest",
+                                    style: TextStyle(color: Colors.white,fontSize: 15,fontFamily: "Poppins-Medium"),
+                                  ),
+                                ),
+                                inprogress?const Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: CircularProgressIndicator())
+                                    : Container()
+                              ],
                             ),
                           ),
                         ],
@@ -178,13 +197,14 @@ class InvestmentState extends State<Investment> {
       "Type":  "Credit",
     };
     await FirebaseFirestore.instance.collection("requestInvestments").add(data);
-    Navigator.push(
+     Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => userPannel(
             phoneNumber: phonenumber,
           )),
     );
+
   }
 }
 
