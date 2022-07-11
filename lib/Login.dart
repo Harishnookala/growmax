@@ -18,15 +18,18 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController _mobile = new TextEditingController();
-  TextEditingController _otp = new TextEditingController();
+  TextEditingController _mobile = TextEditingController();
+  TextEditingController _otp = TextEditingController();
   String? verificationId;
   bool inProgress = false;
   String errorMessage = "";
   bool error = false;
   User? user;
   SharedPreferences? prefsdata;
-
+  int? _resendToken;
+  String? status;
+  var id;
+  var mobilenumber;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -61,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
                         inputFormatters: <TextInputFormatter>[
                           FilteringTextInputFormatter.digitsOnly
                         ],
-                        decoration: new InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Mobile Number",
                           labelStyle: TextStyle(
                               color: Colors.deepOrangeAccent,
@@ -85,7 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                               color: Colors.grey.shade600,
                               fontFamily: "Poppins-Medium"),
                           controller: _otp,
-                          decoration: new InputDecoration(
+                          decoration: InputDecoration(
 
                             labelText: "OTP",
                             focusedBorder: UnderlineInputBorder(
@@ -96,127 +99,22 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       )
                     ],
+                    verificationId!=null?Container(
+                      padding: EdgeInsets.only(bottom: 13),
+                      margin: EdgeInsets.symmetric(horizontal: 40),
+                      alignment: Alignment.topRight,
+                      child: GestureDetector(
+                        onTap: (){
+                          get_otp(verificationId);
+                        },
+                        child: Text("Resend Otp",style: TextStyle(color: Colors.pinkAccent,
+                            fontSize: 16,
+                            decoration: TextDecoration.underline,fontWeight: FontWeight.w600),),
+                      ),
+                    ):Container(),
                     GestureDetector(
                       onTap: () async {
-                        prefsdata = await SharedPreferences.getInstance();
-
-                        setState(() {
-                          errorMessage = "";
-                          error = false;
-                        });
-                        var valid;
-
-                        var users = await FirebaseFirestore.instance.collection("Users").doc(_mobile.text).get();
-
-                        if(users.exists){
-                          valid = users.get("mobilenumber");
-                         }
-                        else{
-                          valid = null;
-                        }
-                      print(valid);
-
-                        FirebaseAuth auth = FirebaseAuth.instance;
-                        if (phoneValidator(_mobile.text) != null) {
-                          setState(() {
-                            errorMessage = phoneValidator(_mobile.text)!;
-                            error = true;
-                          });
-                          return;
-                        }
-                        else if(valid==null){
-
-                          setState(() {
-                            errorMessage = "User is not registered";
-                            error = true;
-                          });
-                          return;
-                        }
-                        if (verificationId == null) {
-                          setState(() {
-                            inProgress = true;
-                          });
-                          await FirebaseAuth.instance.verifyPhoneNumber(
-                            phoneNumber: '+91' + _mobile.text,
-                            timeout: Duration(minutes: 1),
-                            verificationCompleted: (PhoneAuthCredential credential) async {
-                              await auth.signInWithCredential(credential).then((value) async {
-                                if (value.user!.providerData[0].phoneNumber != null) {
-                                  prefsdata!.setString('phonenumber', _mobile.text);
-
-                                  return Navigator.of(context).pushReplacement(
-                                       MaterialPageRoute(
-                                          builder: (BuildContext context) {
-                                    return userPannel(
-                                      phoneNumber: _mobile.text,
-                                    );
-                                  }));
-                                } //Here
-                              });
-                            },
-                            verificationFailed: (FirebaseAuthException e) {
-                              print(e.message);
-                              setState(() {
-                                inProgress = true;
-                                errorMessage = e.message!;
-                                error = true;
-                              });
-                              print("Verification Failed");
-                            },
-                            codeSent: (String verificationId, int? resendToken) {
-                              print("Code Sent " + verificationId);
-                              setState(() {
-                                errorMessage =
-                                    "Please enter the OTP sent to your mobile number.";
-                                error = false;
-                                inProgress = false;
-                                this.verificationId = verificationId;
-                              });
-                            },
-                            codeAutoRetrievalTimeout: (String verificationId) {
-                              print("Code Auto Retrieval Timeout " + verificationId);
-                            },
-                          );
-                        } else {
-                          if (this.verificationId != null) {
-                            if (_otp.text.isEmpty || _otp.text.length < 6) {
-                              setState(() {
-                                errorMessage =
-                                    "Please enter a valid OTP.\nIt should be at least 6 digits.";
-                              });
-                              return;
-                            }
-                            setState(() {
-                              inProgress = true;
-                            });
-                            PhoneAuthCredential credential =
-                                PhoneAuthProvider.credential(
-                                    verificationId: verificationId!,
-                                    smsCode: _otp.text);
-
-                            try {
-                              UserCredential user =
-                                  await auth.signInWithCredential(credential);
-                              Navigator.of(context).pushReplacement(
-                                  new MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                return userPannel(
-                                  phoneNumber: _mobile.text,
-                                );
-                              }));
-                              if (user.user!.phoneNumber != null) {
-                                setState(() {
-                                  inProgress = false;
-                                });
-                              }
-                            } catch (e) {
-                              setState(() {
-                                inProgress = false;
-                                errorMessage = "Failed to validate OTP";
-                              });
-                            }
-                          }
-                        }
+                         get_data();
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -291,7 +189,212 @@ class _LoginPageState extends State<LoginPage> {
     RegExp regExp = RegExp(regexSource);
     if (input == null || input.trim().isEmpty)
       return "Please enter valid phone number";
-    if (!regExp.hasMatch(input)) return "Please enter valid phone number";
+    if (!regExp.hasMatch(input)&&input.length!=10) return "Please enter valid phone number";
     return null;
   }
+
+   get_data() async{
+     prefsdata = await SharedPreferences.getInstance();
+
+     setState(() {
+       errorMessage = "";
+       error = false;
+     });
+
+     var Users = await FirebaseFirestore.instance.collection("Users").get();
+
+     for(int i =0;i<Users.docs.length;i++){
+       if(Users.docs[i].get("mobilenumber")==_mobile.text){
+         id = Users.docs[i].id;
+         mobilenumber = Users.docs[i].get("mobilenumber");
+       }
+     }
+      if(id!=null){
+        id = id;
+        mobilenumber = mobilenumber;
+      }
+      else{
+        id = null;
+      }
+     FirebaseAuth auth = FirebaseAuth.instance;
+     if (phoneValidator(_mobile.text) != null) {
+       setState(() {
+         errorMessage = phoneValidator(_mobile.text)!;
+         error = true;
+       });
+       return;
+     }
+     else if(id==null){
+
+       setState(() {
+         errorMessage = "User is not registered";
+         error = true;
+       });
+       return;
+     }
+     if (verificationId == null) {
+       setState(() {
+         inProgress = true;
+       });
+       await FirebaseAuth.instance.verifyPhoneNumber(
+         phoneNumber: '+91' + _mobile.text,
+         timeout: const Duration(seconds: 20),
+         verificationCompleted: (PhoneAuthCredential credential) async {
+            var userCredential = await auth.signInWithCredential(credential);
+            var user = userCredential.user!.providerData[0].phoneNumber;
+              if(user!=null){
+                prefsdata!.setString('phonenumber', _mobile.text);
+                 Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                        builder: (BuildContext context) {
+                          return userPannel(
+                            id: id,
+                            phonenumber: mobilenumber,
+                          );
+                        }));
+              }
+            },
+         verificationFailed: (FirebaseAuthException e) {
+           setState(() {
+             inProgress = true;
+             errorMessage = e.message!;
+             error = true;
+           });
+         },
+         codeSent: (String verificationId, int? resendToken) {
+           setState(() {
+             errorMessage =
+             "Please enter the OTP sent to your mobile number.";
+             error = false;
+             inProgress = false;
+             this.verificationId = verificationId;
+           });
+         },
+         codeAutoRetrievalTimeout: (String? verificationId) {
+         },
+       );
+     } else {
+       if (this.verificationId != null) {
+         if (_otp.text.isEmpty || _otp.text.length < 6) {
+           setState(() {
+             errorMessage =
+             "Please enter a valid OTP.\nIt should be at least 6 digits.";
+           });
+           return;
+         }
+         setState(() {
+           inProgress = true;
+         });
+         PhoneAuthCredential credential =
+         PhoneAuthProvider.credential(
+             verificationId: verificationId!,
+             smsCode: _otp.text);
+
+         try {
+           UserCredential user =
+               await auth.signInWithCredential(credential);
+           prefsdata!.setString('phonenumber', _mobile.text);
+           Navigator.of(context).pushReplacement(
+               MaterialPageRoute(
+                   builder: (BuildContext context) {
+                     return userPannel(
+                       id: id,
+                       phonenumber: _mobile.text,
+                     );
+                   }));
+           if (user.user!.phoneNumber != null) {
+             setState(() {
+               inProgress = false;
+             });
+           }
+         } catch (e) {
+           setState(() {
+             inProgress = false;
+             errorMessage = "Failed to validate OTP";
+           });
+         }
+       }
+     }
+   }
+
+   get_otp(String? verificationId) async {
+     prefsdata = await SharedPreferences.getInstance();
+     FirebaseAuth auth =FirebaseAuth.instance;
+     if (verificationId != null) {
+       await FirebaseAuth.instance.verifyPhoneNumber(
+         phoneNumber: '+91' + _mobile.text,
+         timeout: const Duration(seconds: 20),
+         verificationCompleted: (PhoneAuthCredential credential) async {
+           var userCredential = await auth.signInWithCredential(credential);
+           var user = userCredential.user!.providerData[0].phoneNumber;
+           if(user!=null){
+             prefsdata!.setString('phonenumber', _mobile.text);
+              print(prefsdata!.getString("phonenumber"));
+             Navigator.of(context).pushReplacement(
+                 MaterialPageRoute(
+                     builder: (BuildContext context) {
+                       return userPannel(
+                         id: id,
+                         phonenumber: mobilenumber,
+                       );
+                     }));
+           }
+         },
+         verificationFailed: (FirebaseAuthException e) {
+           setState(() {
+             errorMessage = e.message!;
+             error = true;
+           });
+         },
+         codeSent: (String verificationId, int? resendToken) {
+           setState(() {
+             errorMessage =
+             "Please enter the OTP sent to your mobile number.";
+             error = false;
+             inProgress = false;
+             this.verificationId = verificationId;
+           });
+         },
+         codeAutoRetrievalTimeout: (String? verificationId) {
+         },
+       );
+     } else {
+       if (this.verificationId != null) {
+         if (_otp.text.isEmpty || _otp.text.length < 6) {
+           setState(() {
+             errorMessage =
+             "Please enter a valid OTP.\nIt should be at least 6 digits.";
+           });
+           return;
+         }
+
+         PhoneAuthCredential credential =
+         PhoneAuthProvider.credential(
+             verificationId: verificationId!,
+             smsCode: _otp.text);
+
+         try {
+           UserCredential user =
+               await auth.signInWithCredential(credential);
+           Navigator.of(context).pushReplacement(
+               MaterialPageRoute(
+                   builder: (BuildContext context) {
+                     return userPannel(
+                       id:id,
+                         phonenumber:_mobile.text
+                     );
+                   }));
+           if (user.user!.phoneNumber != null) {
+             setState(() {
+               inProgress = false;
+             });
+           }
+         } catch (e) {
+           setState(() {
+             errorMessage = "Failed to validate OTP";
+           });
+         }
+       }
+     }
+   }
 }

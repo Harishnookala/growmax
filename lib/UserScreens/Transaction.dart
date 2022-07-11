@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:growmax/repositories/authentication.dart';
 import 'package:intl/intl.dart';
 
 class Transaction extends StatefulWidget {
@@ -25,22 +26,21 @@ class _TransactionState extends State<Transaction> {
   bool? pressed = false;
   var formatter = NumberFormat('#,##0.' + "#" * 5);
   _TransactionState({this.phoneNumber});
-
+  var requestinvestments =
+  FirebaseFirestore.instance.collection("requestInvestments").snapshots();
+  var requestWithdrawls =
+  FirebaseFirestore.instance.collection("requestwithdrawls").snapshots();
+  Authentication authentication = Authentication();
+  var username;
   @override
   Widget build(BuildContext context) {
-    var investments = FirebaseFirestore.instance
-        .collection("Investments")
-        .doc(phoneNumber)
-        .get();
-    var requestinvestments =
-        FirebaseFirestore.instance.collection("requestInvestments").snapshots();
-    var requestWithdrawls =
-        FirebaseFirestore.instance.collection("requestwithdrawls").snapshots();
     var investAmount;
     return Container(
       margin: EdgeInsets.all(16.3),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: ListView(
+        padding: EdgeInsets.zero,
+         shrinkWrap: true,
+        physics: ScrollPhysics(),
         children: [
           const SizedBox(
             height: 30,
@@ -51,6 +51,7 @@ class _TransactionState extends State<Transaction> {
               child: const Text(
                 "Transactions",
                 style: TextStyle(
+                  fontSize: 15.5,
                     color: Colors.pinkAccent,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.6),
@@ -77,7 +78,7 @@ class _TransactionState extends State<Transaction> {
                   ),
                   Container(
                     alignment: Alignment.center,
-                    child: get_invests(investments, investAmount),
+                    child: get_invests(),
                   ),
                 ],
               ),
@@ -112,7 +113,7 @@ class _TransactionState extends State<Transaction> {
                                     dateTimeRange = await showDateRangePicker(
                                       context: context,
                                       firstDate: DateTime(2022),
-                                      lastDate: DateTime.now(),
+                                      lastDate: DateTime.now().add(Duration(days: 1)),
                                     );
                                     setState(() {
                                       start = dateTimeRange!.start;
@@ -147,39 +148,42 @@ class _TransactionState extends State<Transaction> {
                             onPressed: () {
                               setState(() {
                                 pressed = true;
+
                               });
+
                             },
                             child: Text(
                               "Submit",
                               style: TextStyle(color: Colors.white,fontFamily: "Poppins-Medium",fontSize: 15 ),
                             )),
                       ),
+                    ),
+                    pressed!?
+                    ListView(
+                      shrinkWrap: true,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text("Date"),
+                            Text("Transactions"),
+                          ],
+                        ),
+                        Divider(
+                          color: Colors.grey,
+                        ),
+                        Container(
+                          child: get_allinvestments(
+                              requestinvestments, requestWithdrawls),
+                        )
+                      ],
                     )
+                        : Container(
+                      margin: EdgeInsets.zero,
+                    ),
                   ],
                 ),
-                pressed == true
-                    ? ListView(
-                       shrinkWrap: true,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Text("Date"),
-                              Text("Transactions"),
-                            ],
-                          ),
-                          Divider(
-                            color: Colors.grey,
-                          ),
-                          Container(
-                            child: get_allinvestments(
-                                requestinvestments, requestWithdrawls),
-                          )
-                        ],
-                      )
-                    : Container(
-                   margin: EdgeInsets.zero,
-                ),
+
               ],
             ),
           ),
@@ -188,16 +192,17 @@ class _TransactionState extends State<Transaction> {
     );
   }
 
-  get_invests(invest, investAmount) {
+  get_invests() {
     return Container(
       margin: EdgeInsets.only(bottom: 12.3),
-      child: FutureBuilder<DocumentSnapshot>(
-        future: invest,
+      child: FutureBuilder<DocumentSnapshot?>(
+        future: authentication.investments(widget.phoneNumber),
         builder: (context, snap) {
-          if (snap.hasData && snap.requireData.exists) {
+          if (snap.hasData && snap.requireData!.exists) {
             DocumentSnapshot? documentSnapshot = snap.data;
             var afterformat = formatter.format(double.parse(
                 documentSnapshot!.get("InvestAmount").replaceAll(",", "")));
+            username = documentSnapshot.get("username");
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -236,7 +241,6 @@ class _TransactionState extends State<Transaction> {
                   List dates = get_dates(userinvestments);
                   List? transactions =
                       get_transactions(dates, selected_dates, userinvestments);
-                  print(transactions);
                   return ListView.builder(
                         itemCount: transactions!.length,
                         shrinkWrap: true,
@@ -298,7 +302,7 @@ class _TransactionState extends State<Transaction> {
               },
             ):Container();
           }
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         });
   }
 
@@ -306,7 +310,7 @@ class _TransactionState extends State<Transaction> {
     List dates = [];
     List all_dates = [];
     for (int i = 0; i < userinvestments.length; i++) {
-      if (userinvestments[i].get("phonenumber") == phoneNumber &&
+      if (userinvestments[i].get("username") == username &&
           userinvestments[i].get("status") == "Accept") {
         var date = DateTime.fromMicrosecondsSinceEpoch(
             userinvestments[i].get("CreatedAt").microsecondsSinceEpoch);
@@ -314,6 +318,7 @@ class _TransactionState extends State<Transaction> {
         all_dates = get_sort(dates);
       }
     }
+
     return all_dates;
   }
 
@@ -350,27 +355,27 @@ class _TransactionState extends State<Transaction> {
     for (int i = 0; i < selected_dates.length; i++) {
       format_dates.add(DateFormat('dd/MM/yyyy').format(selected_dates[i]));
     }
-    for (int j = 0; j < dates.length; j++) {
+    for(int j=0;j<dates.length;j++){
       dateformat = DateFormat('dd/MM/yyyy').format(dates[j]);
-      for (int k = 0; k < userinvestments.length; k++) {
-        DateTime dateTime = userinvestments[k].get("CreatedAt").toDate();
-        if (userinvestments[k].get("status") == "Accept" &&
-            dates[j] == dateTime &&
-            userinvestments[k].get("phonenumber") == phoneNumber) {
-          var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
-          if (userinvestments[k].get("Type") == "Credit") {
-            symbol = "+";
-          } else {
-            symbol = " - ";
+      for(int k=0;k<format_dates.length;k++){
+        if(dateformat==format_dates[k]){
+          for(int l =0;l<userinvestments.length;l++){
+            DateTime dateTime = userinvestments[l].get("CreatedAt").toDate();
+            if(userinvestments[l].get("status")=="Accept"&&dates[j]==dateTime){
+              var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
+              if(userinvestments[l].get("Type")=="Credit"){
+                symbol ="+";
+              }
+              else{
+                symbol= " - ";
+              }
+              all_transactions.add([dateformat,[symbol],userinvestments[l].get("InvestAmount")]);
+            }
           }
-          all_transactions.add([
-            dateformat,
-            [symbol],
-            userinvestments[k].get("InvestAmount")
-          ]);
         }
       }
     }
+
     return all_transactions;
   }
 }

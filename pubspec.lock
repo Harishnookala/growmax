@@ -120,6 +120,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.6.2"
+  email_validator:
+    dependency: "direct main"
+    description:
+      name: email_validator
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
   fake_async:
     dependency: transitive
     description:
@@ -700,6 +707,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.9"
+  timer_count_down:
+    dependency: "direct main"
+    description:
+      name: timer_count_down
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.1"
   typed_data:
     dependency: transitive
     description:

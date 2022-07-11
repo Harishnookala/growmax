@@ -23,7 +23,6 @@ class _shownnomineeState extends State<shownnominee> {
   }
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    print("BACK BUTTON!"); // Do some stuff.
     return true;
   }
   @override
@@ -45,7 +44,7 @@ class _shownnomineeState extends State<shownnominee> {
                     IconButton(onPressed: (){
                       Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              userPannel(phoneNumber: widget.phonenumber,)));
+                              userPannel(id: widget.phonenumber,)));
                     }, icon: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.lightBlueAccent,)),
                     Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
                     Container(

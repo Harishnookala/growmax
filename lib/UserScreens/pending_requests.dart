@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
+import 'package:growmax/UserScreens/withdraw.dart';
 import 'package:intl/intl.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 
 class pending_requests extends StatefulWidget {
   String? phonenumber;
-  pending_requests({Key? key, this.phonenumber}) : super(key: key);
+  String?username;
+  pending_requests({Key? key, this.phonenumber,this.username}) : super(key: key);
 
   @override
   State<pending_requests> createState() => _pending_requestsState();
@@ -29,7 +31,6 @@ class _pending_requestsState extends State<pending_requests> {
   }
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    print("BACK BUTTON!"); // Do some stuff.
     return true;
   }
   @override
@@ -49,7 +50,7 @@ class _pending_requestsState extends State<pending_requests> {
                   IconButton(onPressed: (){
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            userPannel(phoneNumber: widget.phonenumber,)));
+                            userPannel(phonenumber: widget.phonenumber,)));
                   }, icon: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.lightBlueAccent,)),
                   Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
                   Container(
@@ -111,7 +112,7 @@ class _pending_requestsState extends State<pending_requests> {
                       snapshot.data!.docs;
                   userinvestments.addAll(userwithdrawls);
                   List dates = get_dates(userinvestments);
-                  List? transactions = get_transactions(dates, userinvestments);
+                  List? transactions = get_transactions(dates, userinvestments,widget.username);
 
                   return Container(
                     margin: EdgeInsets.only(bottom: 5.6),
@@ -229,13 +230,13 @@ class _pending_requestsState extends State<pending_requests> {
   }
 
   List? get_transactions(
-      List dates, List<QueryDocumentSnapshot<Object?>> userinvestments) {
+      List dates, List<QueryDocumentSnapshot<Object?>> userinvestments, String? username) {
     List alltransactions = [];
     String Symbol;
     for (int i = 0; i < userinvestments.length; i++) {
       DateTime dateTime = userinvestments[i].get("CreatedAt").toDate();
       if (userinvestments[i].get("status") == "pending" &&
-          userinvestments[i].get("phonenumber") == widget.phonenumber) {
+          userinvestments[i].get("username") == username) {
         var date = DateFormat('dd/MM/yyyy').format(dateTime);
         if (userinvestments[i].get("Type") == "Credit") {
           Symbol = "+";
@@ -244,12 +245,8 @@ class _pending_requestsState extends State<pending_requests> {
         }
         var type = userinvestments[i].get("Type");
         alltransactions.add([
-          date,
-          [Symbol],
-          userinvestments[i].get("InvestAmount"),
-          type
+          date, [Symbol], userinvestments[i].get("InvestAmount"), type
         ]);
-        print(alltransactions);
       }
     }
     return alltransactions;

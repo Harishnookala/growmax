@@ -3,30 +3,29 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
+import 'package:growmax/repositories/authentication.dart';
 
 class Investment extends StatefulWidget {
-  String? phonenumber;
-  Investment({Key? key, this.phonenumber}) : super(key: key);
+  String? id;
+  String?phonenumber;
+  String?username;
+  Investment({Key? key, this.id,this.phonenumber,this.username}) : super(key: key);
 
   @override
-  InvestmentState createState() => InvestmentState(phonenumber: this.phonenumber);
+  InvestmentState createState() => InvestmentState(id: this.id);
 }
 
 class InvestmentState extends State<Investment> {
   TextEditingController creditController = TextEditingController();
-  String? phonenumber;
+  String? id;
   int? Investments;
   bool inprogress = false;
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
-
-  InvestmentState({this.phonenumber});
+  InvestmentState({this.id});
+  Authentication authentication =Authentication();
   @override
   Widget build(BuildContext context) {
-    var  balance = FirebaseFirestore.instance
-        .collection("Investments")
-        .doc(phonenumber)
-        .get();
     DocumentSnapshot<Object?>?amount;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -34,12 +33,18 @@ class InvestmentState extends State<Investment> {
         body: Column(
           children: [
             const SizedBox(
-              height: 40,
+              height: 10,
             ),
             Container(
                 margin: EdgeInsets.all(12.3),
                 child: Column(
                   children: [
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(onPressed: (){
+                        Navigator.pop(context);
+                      }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
+                    ),
                     Center(
                       child: Column(
                         children: [
@@ -56,22 +61,22 @@ class InvestmentState extends State<Investment> {
                         ],
                       ),
                     ),
-                    FutureBuilder<DocumentSnapshot>(
-                      future: balance,
+                    FutureBuilder<DocumentSnapshot?>(
+                      future: authentication.get_invests(widget.username) ,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.requireData.exists) {
+                        if (snapshot.hasData && snapshot.requireData!.exists) {
                           amount = snapshot.data;
-                          return Text(
+                          return Text("₹ " +
                             amount!.get("InvestAmount"),
                             style: const TextStyle(
                                 color: Colors.blue,
                                 fontSize: 16,
                                 fontFamily: "Poppins-Medium"),
                           );
+                        } else{
+                          return Text("₹ 0.0",style: TextStyle(color: Colors.blue,fontSize: 16),);
                         }
-                        else{
-                          return Text("₹ 0.00",style: TextStyle(fontFamily: "Poppins-Light",fontSize: 16),);
-                        }
+
 
                       },
                     ),
@@ -144,12 +149,12 @@ class InvestmentState extends State<Investment> {
                                       inprogress =true;
                                     });
                                     if(formKey.currentState!.validate()){
-
+                                      setState((){
+                                        inprogress =true;
+                                      });
                                       get_data();
                                     }
-                                    else{
-                                      inprogress =true;
-                                    }
+
                                   },
 
                                   child: const Text(
@@ -190,22 +195,25 @@ class InvestmentState extends State<Investment> {
 
   get_data() async {
     Map<String, dynamic> data = {
-      "phonenumber": phonenumber,
+      "phonenumber": widget.phonenumber,
       "InvestAmount": creditController.text.toString(),
       "CreatedAt": DateTime.now(),
       "status": "pending",
       "Type":  "Credit",
+      "username":widget.username,
     };
     await FirebaseFirestore.instance.collection("requestInvestments").add(data);
      Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => userPannel(
-            phoneNumber: phonenumber,
+            phonenumber: widget.phonenumber,
           )),
     );
 
   }
+
+
 }
 
 

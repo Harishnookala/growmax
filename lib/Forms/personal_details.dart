@@ -207,7 +207,6 @@ class _personal_detailsState extends State<personal_details> {
 
   build_name() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
@@ -219,6 +218,7 @@ class _personal_detailsState extends State<personal_details> {
         },
         controller: nameController,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -238,12 +238,18 @@ class _personal_detailsState extends State<personal_details> {
 
   build_Lastname() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (lastname){
+          if(lastname==null||lastname.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
         controller: lastNameContoller,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -347,7 +353,7 @@ class _personal_detailsState extends State<personal_details> {
 
   build_dateofbirth() {
     return SizedBox(
-      height: 48,
+      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: Container(
         decoration:  BoxDecoration(border: Border.all(color: Color(0xcc9fce4c)),borderRadius: BorderRadius.circular(4.3)),
@@ -395,95 +401,97 @@ class _personal_detailsState extends State<personal_details> {
     return SizedBox(
       height: 53,
       width: MediaQuery.of(context).size.width/1.2,
-      child: Container(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton2(
-            isExpanded: true,
-            hint: Row(
-              children:  [
-                SizedBox(
-                  width: 4,
-                ),
-                Expanded(
-                  child: Text(
-                    'Select status',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.brown,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            items: martialStatus
-                .map((item) => DropdownMenuItem<String>(
-              value: item,
-              child: Text(
-                item,
-                style:  TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton2(
+          isExpanded: true,
+          hint: Row(
+            children:  const [
+              SizedBox(
+                width: 4,
               ),
-            ))
-                .toList(),
-            style: TextStyle(color: Colors.black54,fontFamily: "Poppins-Medium",fontWeight: FontWeight.w900),
-            value: status,
-            onChanged: (value) {
-              setState(() {
-                print(status);
-                status = value as String;
-              });
-            },
-            icon: const Icon(
-              Icons.arrow_drop_down,
-              color: Colors.black,
-            ),
-            iconSize: 25,
-            iconEnabledColor: Color(0xcc9fce4c),
-            buttonHeight: 80,
-            buttonWidth: 160,
-            buttonPadding: const EdgeInsets.only(left: 14, right: 14),
-            buttonDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  width: 1.8,
-                  color: Color(0xcc9fce4c),
+              Expanded(
+                child: Text(
+                  'Select status',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.brown,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                color: Colors.white),
-            itemHeight: 40,
-            itemPadding: const EdgeInsets.only(left: 14, right: 14),
-            dropdownMaxHeight: 200,
-            dropdownWidth: 250,
-            dropdownPadding: null,
-            dropdownDecoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              color: Colors.white,
-            ),
-            dropdownElevation: 8,
-            scrollbarRadius: const Radius.circular(40),
-            scrollbarThickness: 6,
-            scrollbarAlwaysShow: true,
-            offset: const Offset(20, 0),
+              ),
+            ],
           ),
+          items: martialStatus
+              .map((item) => DropdownMenuItem<String>(
+            value: item,
+            child: Text(
+              item,
+              style:  TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ))
+              .toList(),
+          style: TextStyle(color: Colors.black54,fontFamily: "Poppins-Medium",fontWeight: FontWeight.w900),
+          value: status,
+          onChanged: (value) {
+            setState(() {
+              status = value as String;
+            });
+          },
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            color: Colors.black,
+          ),
+          iconSize: 25,
+          iconEnabledColor: Color(0xcc9fce4c),
+          buttonHeight: 80,
+          buttonWidth: 160,
+          buttonPadding: const EdgeInsets.only(left: 14, right: 14),
+          buttonDecoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                width: 1.8,
+                color: Color(0xcc9fce4c),
+              ),
+              color: Colors.white),
+          itemHeight: 40,
+          itemPadding: const EdgeInsets.only(left: 14, right: 14),
+          dropdownMaxHeight: 200,
+          dropdownWidth: 250,
+          dropdownPadding: null,
+          dropdownDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            color: Colors.white,
+          ),
+          dropdownElevation: 8,
+          scrollbarRadius: const Radius.circular(40),
+          scrollbarThickness: 6,
+          scrollbarAlwaysShow: true,
+          offset: const Offset(20, 0),
         ),
       ),
-
-
     );
 
   }
 
   buildFatherName() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (fathername){
+          if(fathername==null||fathername.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
         controller: fatherNameContoller,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -502,12 +510,18 @@ class _personal_detailsState extends State<personal_details> {
   }
   buildMotherName() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (mothername){
+          if(mothername==null||mothername.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
         controller: motherNameContoller,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -537,8 +551,7 @@ class _personal_detailsState extends State<personal_details> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.6)),
         ),
         onPressed: (){
-          print(image);
-           if(image!=null&&nameController.text!=null&&selected_value!=null&&formKey.currentState!.validate())
+           if(formKey.currentState!.validate()&&image!=null&&date!=null&&selected_value!=null&&status!=null)
              Navigator.push(
                context,
                MaterialPageRoute(builder: (context) =>
@@ -596,7 +609,7 @@ class _personal_detailsState extends State<personal_details> {
                 style: TextButton.styleFrom(backgroundColor: Colors.purple.shade400),
                 onPressed: (){
                   get_permissions();
-                },child: Text("Upload Profile",style: TextStyle(color: Colors.white),)),
+                },child: Text("Upload profile",style: TextStyle(color: Colors.white),)),
           )
         ],
       ),
@@ -635,9 +648,7 @@ class _personal_detailsState extends State<personal_details> {
     XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
     );
-    print(pickedFile!.path);
     if (pickedFile != null) {
-      print(nameController.text);
       setState(() {
         image_url = File(pickedFile.path);
         image =  authentication.moveToStorage(image_url, nameController.text,profile_image);

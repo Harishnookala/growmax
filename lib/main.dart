@@ -14,7 +14,7 @@ Future<void> main() async{
   var token = prefs.getString('phonenumber');
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: token==null?SplashScreen():userPannel(phoneNumber: token,)));
+      home: token==null?SplashScreen():userPannel(phonenumber: token,)));
 }
 
 class MyApp extends StatelessWidget {

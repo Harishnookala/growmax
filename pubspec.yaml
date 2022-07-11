@@ -53,6 +53,8 @@ dependencies:
   flutter_simple_dependency_injection: ^2.0.0
   get: ^4.6.5
   back_button_interceptor: ^6.0.0
+  email_validator: ^2.0.1
+  timer_count_down: ^2.2.1
 
 dev_dependencies:
   flutter_test:

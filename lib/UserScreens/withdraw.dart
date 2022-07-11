@@ -2,42 +2,47 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
+import 'package:growmax/repositories/authentication.dart';
 
 class withdraw extends StatefulWidget {
-  String? phonenumber;
-  withdraw({Key? key, this.phonenumber}) : super(key: key);
+  String? id;
+  String?phonenumber;
+  String?username;
+  withdraw({Key? key, this.id,this.phonenumber,this.username}) : super(key: key);
 
   @override
-  _withdrawState createState() => _withdrawState(phonenumber: this.phonenumber);
+  _withdrawState createState() => _withdrawState(id: this.id);
 }
 
 class _withdrawState extends State<withdraw> {
   TextEditingController debitController = TextEditingController();
-  String? phonenumber;
+  String? id;
+  Authentication authentication = Authentication();
   int? Investments;
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
    bool inprogress = false;
-  _withdrawState({this.phonenumber});
+  _withdrawState({this.id});
   @override
   Widget build(BuildContext context) {
     DocumentSnapshot<Object?>?amount;
-    var balance = FirebaseFirestore.instance
-        .collection("Investments")
-        .doc(phonenumber)
-        .get();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
           children: [
-            const SizedBox(
-              height: 40,
-            ),
+            SizedBox(height: 10,),
             Container(
                 margin: EdgeInsets.all(12.3),
                 child: Column(
                   children: [
+                    Container(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(onPressed: (){
+                        Navigator.pop(context);
+                      }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
+                    ),
                     Center(
                       child: Column(
                         children: [
@@ -54,13 +59,12 @@ class _withdrawState extends State<withdraw> {
                         ],
                       ),
                     ),
-                    FutureBuilder<DocumentSnapshot>(
-                      future: balance,
+                    FutureBuilder<DocumentSnapshot?>(
+                      future: authentication.investments(widget.phonenumber),
                       builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.requireData.exists) {
+                        if (snapshot.hasData && snapshot.requireData!.exists) {
                            amount = snapshot.data;
                            amount!.get("InvestAmount");
-                          print(amount.toString());
                           return Text(
                             amount!.get("InvestAmount"),
                             style: const TextStyle(
@@ -69,9 +73,11 @@ class _withdrawState extends State<withdraw> {
                                 fontFamily: "Poppins-Medium"),
                           );
                         }
-                        else{
+                        else if(snapshot.hasError){
                           return Text("₹ 0.00",style: TextStyle(fontFamily: "Poppins-Light",fontSize: 16),);
-                        }
+                        }return Center(
+                            widthFactor: 1.3,
+                            child: CircularProgressIndicator(color: Colors.lightGreenAccent,));
 
                       },
                     ),
@@ -91,11 +97,9 @@ class _withdrawState extends State<withdraw> {
                      child: Column(
                        children: [
                          SizedBox(
-                           height: 70,
-                           width: 300,
                            child: Container(
                              margin: const EdgeInsets.only(
-                                 top: 5.8, left: 6.3, bottom: 12.3),
+                                 top: 5.8, left: 12.3, bottom: 12.3,right: 12.3),
                              child: TextFormField(
                                validator: (amount) {
                                  if (amount!.isEmpty||!amount.isNum) {
@@ -104,6 +108,7 @@ class _withdrawState extends State<withdraw> {
                                  return null;
                                },
                                decoration: InputDecoration(
+                                 contentPadding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
                                    prefix: Container(
                                      margin: const EdgeInsets.only(right: 8.3),
                                      child: const Text("₹",
@@ -138,6 +143,7 @@ class _withdrawState extends State<withdraw> {
                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
                                    backgroundColor: Colors.deepOrange.shade400),
                                onPressed: () async {
+
                                  setState(() {
                                    var investamount = double.parse(amount!.get("InvestAmount"));
                                    var debit = double.parse(debitController.text);
@@ -151,19 +157,19 @@ class _withdrawState extends State<withdraw> {
                                    }
 
                                  });
-
                                  if(formKey.currentState!.validate()&&pressed){
                                    Map<String, dynamic> data = {
-                                     "phonenumber": phonenumber,
+                                     "phonenumber": widget.phonenumber,
                                      "InvestAmount": debitController.text.toString(),
                                      "CreatedAt": DateTime.now(),
                                      "status": "pending",
                                      "Type" : "Debit",
+                                     "username":widget.username.toString(),
                                    };
                                    await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
                                    Navigator.of(context).pushReplacement(MaterialPageRoute(
                                        builder: (BuildContext context) =>
-                                           userPannel(phoneNumber: widget.phonenumber,)));
+                                           userPannel(phonenumber: widget.phonenumber,)));
                                  }
 
                                },
@@ -198,5 +204,10 @@ class _withdrawState extends State<withdraw> {
     else{
       return false;
     }
+  }
+
+  get_name() async{
+    var user_name = await FirebaseFirestore.instance.collection("Users").doc(id).get();
+    return user_name.get("username");
   }
 }

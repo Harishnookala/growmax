@@ -1,12 +1,16 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../UserScreens/userPannel.dart';
 import 'Pan_details.dart';
 
 class BankAccount extends StatefulWidget {
   String?phonenumber;
-   BankAccount({this.phonenumber});
+  String?id;
+   BankAccount({this.phonenumber,this.id });
 
   @override
   _BankAccountState createState() => _BankAccountState();
@@ -17,7 +21,20 @@ class _BankAccountState extends State<BankAccount> {
   TextEditingController Reenternumber = TextEditingController();
   TextEditingController Ifsc = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  void initState() {
+    super.initState();
+    BackButtonInterceptor.add(myInterceptor);
+  }
 
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
+  }
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    return true;
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,11 +44,21 @@ class _BankAccountState extends State<BankAccount> {
         body: Container(
           margin: const EdgeInsets.all(12.3),
           child: ListView(
+            padding: EdgeInsets.zero,
              shrinkWrap: true,
             children: [
+              Container(
+                alignment: Alignment.topLeft,
+                child: IconButton(onPressed: (){
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          userPannel(phonenumber: widget.phonenumber,)));
+                }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
+              ),
               Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
               Container(
                   margin: EdgeInsets.all(5.3),
+
                   child: Container(
                       margin: const EdgeInsets.only(
                         left: 13.3,
@@ -50,6 +77,7 @@ class _BankAccountState extends State<BankAccount> {
                 child: Container(
                   margin: EdgeInsets.only(left: 12.3,right: 12.3,top: 12.3),
                   child: ListView(
+                    padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     children: [
                       Container(
@@ -105,10 +133,13 @@ class _BankAccountState extends State<BankAccount> {
 
   buildAccountNumber() {
     return SizedBox(
-
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
-        style: TextStyle(fontFamily: "Poppins-Light",),
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly,
+        ],
+        style: const TextStyle(fontFamily: "Poppins-Light",),
         validator: (value) {
           if (value == null || value.isEmpty || !value.isNum) {
             return 'Please enter Valid Account number';
@@ -138,8 +169,11 @@ class _BankAccountState extends State<BankAccount> {
 
   build_reEnternumber() {
     return SizedBox(
-      width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        keyboardType: TextInputType.number,
+        inputFormatters: <TextInputFormatter>[
+          FilteringTextInputFormatter.digitsOnly
+        ],
         style: TextStyle(fontFamily: "Poppins-Light",),
         validator: (value) {
           if (value == null || value.isEmpty||!value.isNum) {
@@ -184,7 +218,7 @@ class _BankAccountState extends State<BankAccount> {
         },
         controller: Ifsc,
         decoration: InputDecoration(
-            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+            contentPadding:  const EdgeInsets.symmetric(vertical: 17.0, horizontal: 10.0),
 
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
@@ -208,21 +242,31 @@ class _BankAccountState extends State<BankAccount> {
       child: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: Colors.green,
-          minimumSize: Size(80, 20),
+          minimumSize: Size(170, 48),
           elevation: 1.0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.6)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
 
         ),
         onPressed: (){
           if (formKey.currentState!.validate()){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
+
+            Navigator.push (
+              context,
+              MaterialPageRoute (
                 builder: (BuildContext context) =>
-                    Pan_deatils(phonenumber: widget.phonenumber,accountnumber: accountNumbeController.text,Ifsc: Ifsc.text,)));
+                    Pan_deatils(phonenumber: widget.phonenumber,
+                        accountnumber:accountNumbeController.text,
+                       Ifsc: Ifsc.text,
+                    ),
+              ),
+            );
           }
         },
         child: Container(
             margin: EdgeInsets.only(left: 5.3,right: 5.3),
-            child: Text("Save & Continue",style: TextStyle(color: Colors.white,fontFamily: "Poppins-Medium"),)),
+            child: Text("Save & Continue",style: TextStyle(color: Colors.white,
+                fontSize: 15,
+                fontFamily: "Poppins-Medium"),)),
       ),
     );
   }

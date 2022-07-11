@@ -3,9 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:growmax/Forms/edit_bankdetails.dart';
+import 'package:growmax/repositories/authentication.dart';
  class Banking extends StatefulWidget {
+   String?bank_id;
    String?phoneNumber;
-    Banking({this.phoneNumber});
+    Banking({this.bank_id,this.phoneNumber});
    @override
    _BankingState createState() => _BankingState(phoneNumber:this.phoneNumber);
  }
@@ -13,9 +15,9 @@ import 'package:growmax/Forms/edit_bankdetails.dart';
  class _BankingState extends State<Banking> {
    String?phoneNumber;
    _BankingState({this.phoneNumber});
+   Authentication authentication = Authentication();
    @override
    Widget build(BuildContext context) {
-     var bank_details = FirebaseFirestore.instance.collection("bank_details").doc(widget.phoneNumber).get();
      var id;
      return Column(
        children: [
@@ -31,10 +33,10 @@ import 'package:growmax/Forms/edit_bankdetails.dart';
              ),
              const Divider(color: Colors.grey,thickness: 0.6),
              const SizedBox(height: 10,),
-             FutureBuilder<DocumentSnapshot>(
-                 future: bank_details,
+             FutureBuilder<DocumentSnapshot?>(
+                 future:  authentication.bank_inf(widget.phoneNumber),
                  builder:(context,snapshot){
-                 if(snapshot.hasData&&snapshot.requireData.exists){
+                 if(snapshot.hasData&&snapshot.requireData!.exists){
                    var details = snapshot.data;
                     id = snapshot.data!.id;
                    return details!.get("status")=="Accept"?Container(
@@ -50,7 +52,7 @@ import 'package:growmax/Forms/edit_bankdetails.dart';
                              ],
                            ),
                          ),
-                         SizedBox(height: 15,),
+                         const SizedBox(height: 15,),
                          Container(
                            child:Row(
                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -83,7 +85,11 @@ import 'package:growmax/Forms/edit_bankdetails.dart';
                                  Navigator.push (
                                    context,
                                    MaterialPageRoute (
-                                     builder: (BuildContext context) => edit_details(id: id,Accountnumber:details.get("accountnumber"),ifsc:details.get("ifsc")),
+                                     builder: (BuildContext context) => edit_details(id: id,
+                                         phonenumber:widget.phoneNumber,
+                                         Accountnumber: details.get("accountnumber"),
+                                        ifsc: details.get("ifsc"),
+                                     ),
                                    ),
                                  );
                                }, child: const Text("Edit",style: TextStyle(color: Colors.black87,fontSize: 15,fontWeight: FontWeight.w600),)),
@@ -94,10 +100,8 @@ import 'package:growmax/Forms/edit_bankdetails.dart';
                  }
                  return CircularProgressIndicator();
              }),
-             const SizedBox(
-               height: 20,
-             ),
-          
+            
+
            ],
          ),
          )

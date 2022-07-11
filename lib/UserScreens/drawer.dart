@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:growmax/Login.dart';
 import 'package:growmax/UserScreens/pending_requests.dart';
 import 'package:growmax/UserScreens/shownominee_details.dart';
+import 'package:growmax/repositories/authentication.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Forms/nominee_details.dart';
@@ -19,14 +20,12 @@ class drawer extends StatefulWidget {
 class _drawerState extends State<drawer> {
   @override
   Widget build(BuildContext context) {
-    var users = FirebaseFirestore.instance
-        .collection("Users")
-        .doc(widget.phonenumber)
-        .get();
+    Authentication authentication = Authentication();
     var Creditpendings =
         FirebaseFirestore.instance.collection("requestInvestments").get();
     var Debitpendings =
         FirebaseFirestore.instance.collection("requestwithdrawls").get();
+    var users;
     return Container(
       margin: EdgeInsets.all(12.3),
       child: Container(
@@ -45,11 +44,11 @@ class _drawerState extends State<drawer> {
                           fontSize: 16,
                           fontFamily: "Poppins-Medium"),
                     ),
-                    FutureBuilder<DocumentSnapshot>(
-                      future: users,
+                    FutureBuilder<DocumentSnapshot?>(
+                      future: authentication.users(widget.phonenumber),
                       builder: (context, snapshot) {
-                        if (snapshot.hasData&&snapshot.requireData.exists) {
-                          var users = snapshot.data!;
+                        if (snapshot.hasData&&snapshot.requireData!.exists) {
+                           users = snapshot.data!;
                           return Text(
                             users.get("firstname"),
                             style: TextStyle(
@@ -116,7 +115,7 @@ class _drawerState extends State<drawer> {
                             onPressed: () {
                               Navigator.of(context).pushReplacement(MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                      pending_requests(phonenumber: widget.phonenumber,)));
+                                      pending_requests(phonenumber: widget.phonenumber,username:users.get("username"))));
                             },
                             child: Text(
                               "Pending requests",
@@ -137,7 +136,6 @@ class _drawerState extends State<drawer> {
                           ),
                           onPressed: () async {
                             SharedPreferences prefs = await SharedPreferences.getInstance();
-                             print(prefs.get("phonenumber"));
                             await prefs.clear();
                             Navigator.push(
                               context,

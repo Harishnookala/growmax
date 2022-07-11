@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 
 import '../Login.dart';
-import '../UserScreens/userPannel.dart';
 class Address extends StatefulWidget {
   String? firstname;
   String? lastname;
@@ -52,7 +52,7 @@ class _AddressState extends State<Address> {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Container(
-          margin: EdgeInsets.all(12.3),
+          margin: const EdgeInsets.all(12.3),
           child: Form(
             key: formKey,
             child: ListView(
@@ -64,7 +64,7 @@ class _AddressState extends State<Address> {
                     Container(
                       margin: EdgeInsets.only(left: 14.3,top: 5.3,bottom: 5.3),
                       alignment: Alignment.topLeft,
-                      child: Text("Address & Communication",style: TextStyle(letterSpacing: 0.6,
+                      child: const Text("Address & Communication",style: TextStyle(letterSpacing: 0.6,
                           color: Colors.indigoAccent,
                           fontFamily: "Poppins-Light",
                           fontWeight: FontWeight.w500,
@@ -79,6 +79,7 @@ class _AddressState extends State<Address> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
+                            margin: const EdgeInsets.only(bottom: 8.5),
                             child: const Text(
                               "Mobile number : -",
                               style: TextStyle(
@@ -88,11 +89,11 @@ class _AddressState extends State<Address> {
                                   letterSpacing: 0.6,
                                   fontFamily: "Poppins-Light"),
                             ),
-                            margin: EdgeInsets.only(bottom: 8.5),
                           ),
                           build_mobile(),
-                          SizedBox(height: 5,),
+                          const SizedBox(height: 5,),
                           Container(
+                            margin: EdgeInsets.only(bottom: 8.5),
                             child: const Text(
                               "Email : -",
                               style: TextStyle(
@@ -102,11 +103,11 @@ class _AddressState extends State<Address> {
                                   letterSpacing: 0.6,
                                   fontFamily: "Poppins-Light"),
                             ),
-                            margin: EdgeInsets.only(bottom: 8.5),
                           ),
                           build_email(),
                           SizedBox(height: 5,),
                           Container(
+                            margin: EdgeInsets.only(bottom: 8.5),
                             child: const Text(
                               "Address : -",
                               style: TextStyle(
@@ -116,11 +117,11 @@ class _AddressState extends State<Address> {
                                   letterSpacing: 0.6,
                                   fontFamily: "Poppins-Light"),
                             ),
-                            margin: EdgeInsets.only(bottom: 8.5),
                           ),
                           build_address(),
-                          SizedBox(height: 15,),
+                          const SizedBox(height: 15,),
                           Container(
+                            margin: EdgeInsets.only(bottom: 8.5),
                             child: const Text(
                               "Password : -",
                               style: TextStyle(
@@ -130,11 +131,11 @@ class _AddressState extends State<Address> {
                                   letterSpacing: 0.6,
                                   fontFamily: "Poppins-Light"),
                             ),
-                            margin: EdgeInsets.only(bottom: 8.5),
                           ),
                           build_password(),
-                          SizedBox(height: 10,),
+                          const SizedBox(height: 10,),
                           Container(
+                            margin: EdgeInsets.only(bottom: 8.5),
                             child: const Text(
                               "ReEnterPassword : -",
                               style: TextStyle(
@@ -144,14 +145,13 @@ class _AddressState extends State<Address> {
                                   letterSpacing: 0.6,
                                   fontFamily: "Poppins-Light"),
                             ),
-                            margin: EdgeInsets.only(bottom: 8.5),
                           ),
                           buildRenterPassword(),
                          Row(
                            mainAxisAlignment: MainAxisAlignment.center,
                            children: [
                              build_button(),
-                             inProgress?Padding(
+                             inProgress?const Padding(
                                  padding: EdgeInsets.only(left: 10),
                                  child: CircularProgressIndicator())
                                      : Container()
@@ -176,6 +176,7 @@ class _AddressState extends State<Address> {
             autovalidateMode: AutovalidateMode.onUserInteraction,
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
+                contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
                 focusedBorder: const OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
                 ),
@@ -208,12 +209,21 @@ class _AddressState extends State<Address> {
 
   build_email() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
         style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (email){
+          if(email==null||email.isEmpty){
+            return "please enter Email";
+          }
+          else if(!EmailValidator.validate(emailController.text)&&email.isNotEmpty){
+             return "Please enter valid Email Address";
+          }
+          return null;
+        },
         controller: emailController,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -239,8 +249,15 @@ class _AddressState extends State<Address> {
         maxLines: 15,
         keyboardType: TextInputType.multiline,
         style: TextStyle(fontFamily: "Poppins-Light"),
+        validator: (address){
+          if(address==null||address.isEmpty){
+            return "please enter Address";
+          }
+          return null;
+        },
         controller: addressController,
         decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -524,7 +541,7 @@ class _AddressState extends State<Address> {
           setState(() {
            inProgress =true;
           });
-          if(mobileController.text!=null&&formKey.currentState!.validate()){
+          if(formKey.currentState!.validate()){
             Map<String,dynamic> details ={
               "firstname":widget.firstname,
               "lastname":widget.lastname,
@@ -537,9 +554,10 @@ class _AddressState extends State<Address> {
               "email":emailController.text,
               "address":addressController.text,
               "password":passwordController.text,
-              "image":image
+              "image":image,
+              "username":null,
             };
-            await FirebaseFirestore.instance.collection("Users").doc(mobileController.text.toString()).set(details);
+            await FirebaseFirestore.instance.collection("Users").add(details);
             Navigator.push (
               context,
               MaterialPageRoute (

@@ -33,12 +33,10 @@ class _Nominee_detailsState extends State<Nominee_details> {
   }
 
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
-    print("BACK BUTTON!"); // Do some stuff.
     return true;
   }
   @override
   Widget build(BuildContext context) {
-    print(widget.phonenumber);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
@@ -53,7 +51,7 @@ class _Nominee_detailsState extends State<Nominee_details> {
                 IconButton(onPressed: (){
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                       builder: (BuildContext context) =>
-                          userPannel(phoneNumber: widget.phonenumber,)));
+                          userPannel(id: widget.phonenumber,)));
                 }, icon: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.lightBlueAccent,)),
                 Divider(
                     height: 1, thickness: 1.5, color: Colors.green.shade400),
@@ -266,7 +264,7 @@ class _Nominee_detailsState extends State<Nominee_details> {
             await FirebaseFirestore.instance.collection("nominee_details").doc(widget.phonenumber.toString()).set(data);
             Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (BuildContext context) =>
-                    userPannel(phoneNumber: widget.phonenumber,)));
+                    userPannel(id: widget.phonenumber,)));
           }
         },
         child: Container(

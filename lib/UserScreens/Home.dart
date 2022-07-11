@@ -1,67 +1,52 @@
-import 'dart:async';
-
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_profile_picture/flutter_profile_picture.dart';
-import 'package:get/get.dart';
+import 'package:growmax/UserScreens/profits.dart';
 import 'package:growmax/UserScreens/withdraw.dart';
+import 'package:growmax/repositories/authentication.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Forms/bank_details.dart';
 import 'Investment.dart';
+import 'package:timer_count_down/timer_count_down.dart';
+import 'package:timer_count_down/timer_controller.dart';
 
 class Home extends StatefulWidget {
-  String? phoneNumber;
-  Home({this.phoneNumber});
+  String? id;
+  String? phonenumber;
+  String? bank_id;
+  Home({Key? key, this.id, this.phonenumber, this.bank_id}) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState(phoneNumber: this.phoneNumber);
+  HomeState createState() => HomeState();
 }
 
-class _HomeState extends State<Home> {
-  String? phoneNumber;
+class HomeState extends State<Home> {
   bool? pressed = false;
   SharedPreferences? prefsdata;
   SharedPreferences? prefs;
   var data;
-  _HomeState({this.phoneNumber});
-  var formatter = NumberFormat('#,##0.' + "#" * 5);
-
-  Timer? timer;
-
-  @override
+  var formatter = NumberFormat('#,##0.${"#" * 5}');
+  Authentication authentication = Authentication();
   void initState() {
     super.initState();
-    timer = Timer.periodic(Duration(seconds: 15),(timer) {
-
-    },);
+    BackButtonInterceptor.add(myInterceptor);
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    BackButtonInterceptor.remove(myInterceptor);
     super.dispose();
   }
+
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    var dates = DateFormat('yyy-dd-MMM').format(DateTime.now());
-    var investments = FirebaseFirestore.instance
-        .collection("Investments")
-        .doc(phoneNumber)
-        .get();
-    var profit =
-        FirebaseFirestore.instance.collection("Admin").doc(dates).get();
-    var users = FirebaseFirestore.instance.collection("Users").get();
-    var bank_details = FirebaseFirestore.instance
-        .collection("bank_details")
-        .doc(phoneNumber)
-        .get();
-    var gains = FirebaseFirestore.instance
-        .collection("Current_gains")
-        .doc(phoneNumber)
-        .get();
 
-    var investAmount;
     return Container(
       child: ListView(
         shrinkWrap: true,
@@ -70,15 +55,13 @@ class _HomeState extends State<Home> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Container(
-              margin: EdgeInsets.only(top: 8.0),
+                margin: const EdgeInsets.only(top: 8.0),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-
                       child: Builder(builder: (context) {
                         return IconButton(
                           icon: const Icon(
@@ -92,90 +75,20 @@ class _HomeState extends State<Home> {
                         );
                       }),
                     ),
-                    FutureBuilder<QuerySnapshot>(
-                      future: users,
+                    FutureBuilder<DocumentSnapshot?>(
+                      future: authentication.users(widget.phonenumber),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           var users = snapshot.data;
-                          return Expanded(
-                            child: ListView.builder(
-                              itemCount: users!.docs.length,
-                              itemBuilder: (context, index) {
-                                return users.docs[index].get("mobilenumber") ==
-                                        phoneNumber
-                                    ? Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                                left: 12.3,
-                                                right: 12.3),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      margin: const EdgeInsets.only(top: 6.0),
-                                                      child: Text(
-                                                        "Welcome " +
-                                                            '${users.docs[index].get("firstname")}',
-                                                        style: const TextStyle(
-                                                            color:
-                                                                Colors.deepOrange,
-                                                            fontSize: 15,
-                                                            fontFamily:
-                                                                "Poppins-Medium"),
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      margin:
-                                                          const EdgeInsets.only(
-                                                              top: 1.0),
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width /
-                                                              1.9,
-                                                      child: const Text(
-                                                        "This is the way to build your Future",
-                                                        style: TextStyle(
-                                                            fontSize: 13,
-                                                            color: Colors.grey,
-                                                            fontFamily:
-                                                                "Poppins-Medium"),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                ProfilePicture(
-                                                  name: users.docs[index]
-                                                      .get("lastname"),
-                                                  radius: 38,
-                                                  fontsize: 16,
-                                                  img: users.docs[index]
-                                                      .get("image"),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      )
-                                    : Container();
-                              },
-                              shrinkWrap: true,
-                            ),
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [get_name(users)],
                           );
                         }
                         return Container(
-                         margin: EdgeInsets.only(top: 12.3),
-                          child: Text(
-                            "Welcome",
+                          margin: const EdgeInsets.only(top: 12.3),
+                          child: const Text(
+                            "Welcome  --- Loading ---",
                             style: TextStyle(color: Colors.deepOrange),
                           ),
                         );
@@ -185,7 +98,7 @@ class _HomeState extends State<Home> {
                 ),
               ),
               Container(
-                  margin: EdgeInsets.only(left: 18.3, right: 18.3),
+                  margin: const EdgeInsets.only(left: 18.3, right: 18.3),
                   child: const Divider(
                     thickness: 0.5,
                     color: Colors.black,
@@ -196,495 +109,453 @@ class _HomeState extends State<Home> {
             ],
           ),
           Container(
-            decoration: BoxDecoration(
-                color: Colors.green.shade400,
-                border: Border.all(color: Colors.lime.shade700),
-                borderRadius: BorderRadius.circular(12.3)),
-            margin: EdgeInsets.only(left: 18.3, right: 18.3),
+            margin: const EdgeInsets.only(right: 2.3),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  alignment: Alignment.topLeft,
-                  margin: const EdgeInsets.only(top: 12.3, left: 13.3),
-                  child: const Text(
-                    "Today Portfolio Value : -  ",
+                  decoration: BoxDecoration(
+                      color: Colors.green.shade400,
+                      border: Border.all(color: Colors.lime.shade700),
+                      borderRadius: BorderRadius.circular(12.3)),
+                  margin: const EdgeInsets.only(left: 18.3, right: 18.3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        alignment: Alignment.topLeft,
+                        margin: const EdgeInsets.only(top: 12.3, left: 13.3),
+                        child: const Text(
+                          "Today Portfolio Value : -  ",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                              fontFamily: "Poppins-Medium"),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(
+                            top: 10, bottom: 0.0, left: 25.3, right: 12.3),
+                        child: Row(
+                          children: [
+                            Container(
+                              child: get_invests(),
+                            ),
+                            Container(
+                              child: get_profit(),
+                            )
+                          ],
+                        ),
+                      ),
+                       Container(
+                         margin: EdgeInsets.only(top: 6.3),
+                         child: Center(
+                           child: TextButton(
+                               style: TextButton.styleFrom(
+                                 backgroundColor: Colors.orange,
+                                 minimumSize: Size(120, 20),
+                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.3))
+                               ),
+                               onPressed: () async {
+                                 var details = await authentication.bank_inf(widget.phonenumber);
+                                 Timestamp? date = details!.get("Currentdate");
+                                 Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                     builder: (BuildContext context) =>
+                                         profit(date: date,phonenumber:widget.phonenumber)));
+                               }, child: Text("View details",
+                             style: TextStyle(color: Colors.white,
+                               fontSize: 15,
+                               fontFamily: 'Poppins-Medium'
+                             ),)),
+                         ),
+                       ),
+                      Container(margin: EdgeInsets.only(top: 8.3),)
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 40,
+                ),
+                FutureBuilder<DocumentSnapshot?>(
+                    future: authentication.bank_inf(widget.phonenumber),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        var details = snapshot.data;
+                        if (details!.get("status") == "Accept") {
+                          return Column(
+                            children: [
+                              build_data(),
+                              const SizedBox(
+                                height: 40,
+                              ),
+                              build_Investments()
+                            ],
+                          );
+                        } else if (details.get("status") == "pending") {
+                          return const Center(child: Text("--- Your Status is pending --- ",
+                            style: TextStyle(color: Colors.green,
+                               fontSize: 15,
+                              fontFamily: "Poppins-Medium"
+                            ),
+                          ));
+                        } else if (details.get("status") == "Reject") {
+                          return Center(
+                            child: TextButton(
+                                style: TextButton.styleFrom(
+                                    padding: const EdgeInsets.all(12.3),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25.3),
+                                    ),
+                                    backgroundColor: Colors.green),
+                                onPressed: () {
+                                  Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              BankAccount(
+                                                  phonenumber:
+                                                      widget.phonenumber,
+                                                  id: widget.id)));
+                                },
+                                child: const Text(
+                                  " + Add Bank Details",
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      letterSpacing: 0.6),
+                                )),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Column(
+                            children: const [
+                              SizedBox(
+                                height: 30,
+                              ),
+                              Text("------Loading----")
+                            ],
+                          );
+                        }
+                      }
+                      else {
+                            return Container(
+                              child: get_data(),
+                            );
+                          }
+                      return Container();
+
+                    })
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  get_name(DocumentSnapshot<Object?>? users) {
+    return Container(
+      margin: const EdgeInsets.only(left: 12.3, right: 12.3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 6.0),
+                child: Text(
+                  "Welcome " + '${users!.get("firstname")}',
+                  style: const TextStyle(
+                      color: Colors.deepOrange,
+                      fontSize: 15,
+                      fontFamily: "Poppins-Medium"),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 1.0),
+                width: MediaQuery.of(context).size.width / 1.77,
+                child: const Text(
+                  "This is the way to build your Future",
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey,
+                      fontFamily: "Poppins-Medium"),
+                ),
+              ),
+            ],
+          ),
+          ProfilePicture(
+            name: users.get("lastname"),
+            radius: 42,
+            fontsize: 16,
+            img: users.get("image"),
+          )
+        ],
+      ),
+    );
+  }
+
+  build_data() {
+    return Container(
+      margin: const EdgeInsets.only(left: 12.3,right: 12.3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(left: 12.3),
+            decoration: BoxDecoration(
+                color: Colors.green.shade400,
+                border: Border.all(color: Colors.white),
+                borderRadius: BorderRadius.circular(5.3)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    width: MediaQuery.of(context).size.width / 2.59,
+                    margin: const EdgeInsets.only(
+                        top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children:  [
+                        const Center(
+                            child: Text("Invested Amount",
+                                style: TextStyle(
+                                   letterSpacing: 0.9,
+                                    color: Colors.amberAccent,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: "Poppins-Medium"))),
+                        const SizedBox(height: 10,),
+                        Center(child: get_invests(),),
+
+                      ],
+                    )),
+                const SizedBox(
+                  height: 5,
+                ),
+
+              ],
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 12.3, right: 12.3),
+            decoration: BoxDecoration(
+                border: Border.all(color: Colors.brown),
+                borderRadius: BorderRadius.circular(5.3)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    width: MediaQuery.of(context).size.width / 2.8,
+                    margin: const EdgeInsets.only(
+                        top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
+                    child: const Center(
+                        child: Text(
+                      "Current Gains",
+                      style: TextStyle(
+                          color: Colors.brown, fontWeight: FontWeight.w600),
+                    ))),
+                const SizedBox(
+                  height: 10,
+                ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 8.3),
+                  child: get_gains()
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  get_invests() {
+    return FutureBuilder<DocumentSnapshot?>(
+      future: authentication.investments(widget.phonenumber),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data!.exists) {
+          var investments = snapshot.data;
+          return Container(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("₹ ",style: TextStyle(color: Colors.white,fontSize: 16),),
+                Text(investments!.get("InvestAmount"),style: TextStyle(
+                    color: Colors.white,
+                   fontSize: 15
+                ),),
+              ],
+            ),
+          );
+        }return const Center();
+
+      },
+    );
+  }
+
+  get_profit() {
+    return Container(
+      child: StreamBuilder<DocumentSnapshot?>(
+        stream: authentication.get_profit(),
+        builder: (context,snapshot){
+          if(snapshot.hasData&&snapshot.requireData!.exists){
+            var profit = snapshot.data;
+            var Todayprofit = profit!.get("Todayprofit");
+            double after_profit = double.parse(Todayprofit);
+            return Row(
+              children: [
+                after_profit.isNegative
+                    ? Container(
+                  margin: const EdgeInsets.only(left: 2.3),
+                  child: const Icon(Icons.arrow_downward,
+                      color: Colors.red, size: 25),
+                    )
+                    : Container(
+                  margin: const EdgeInsets.only(left: 2.3),
+                      child: const Icon(Icons.arrow_upward,
+                      color: Colors.white, size: 20),
+                    ),
+                after_profit.isNegative
+                    ? Text(
+                  Todayprofit.toString() + "%",
+                  style: TextStyle(
+                      color: Colors.red, letterSpacing: 1.3, fontSize: 16),
+                )
+                    : Text(Todayprofit.toString() + "%",
                     style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
                         fontSize: 15,
-                        fontFamily: "Poppins-Medium"),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(
-                      top: 10, bottom: 0.0, left: 25.3, right: 12.3),
-                  child: Row(
-                    children: [
-                      Container(
-                        child: get_invests(investments, investAmount),
-                      ),
-                      Container(
-                        child: get_profit(profit),
-                      )
-                    ],
-                  ),
-                ),
-                Container(
-                    alignment: Alignment.center,
-                    child: Container(
-                        margin: const EdgeInsets.only(
-                          bottom: 8.3,
-                          top: 8.3,
-                        ),
-                        width: 120,
-                        decoration: BoxDecoration(
-                            border: Border.all(color: Colors.orange),
-                            borderRadius: BorderRadius.circular(25.3),
-                            color: Colors.orange),
-                        alignment: Alignment.center,
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 8.3, top: 8.3),
-                          child: const Text(
-                            'View details',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          ),
-                        ))),
+                        fontFamily: "Poppins-Medium"))
               ],
+            );
+          }return Container();
+        },
+      ),
+    );
+  }
+
+
+  build_Investments() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 25),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          TextButton(
+            style: TextButton.styleFrom(
+                minimumSize: Size(130, 45),
+                elevation: 0.2,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.6)),
+                backgroundColor: Colors.grey.shade600),
+            onPressed: () async{
+              var bankDetails = await authentication.users(widget.phonenumber);
+              String? username = bankDetails!.get("username");
+              String? id = bankDetails.id;
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                  builder: (context) => withdraw(
+                  phonenumber: widget.phonenumber,
+                  username: username,
+                  id: id)));
+            },
+            child: const Text(
+              "Withdrawl",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontFamily: "Poppins-Medium"),
             ),
           ),
-          const SizedBox(
-            height: 20,
+          TextButton(
+            style: TextButton.styleFrom(
+                minimumSize: Size(125, 45),
+                elevation: 0.2,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6.6)),
+                backgroundColor: Colors.green.shade600),
+            onPressed: () async {
+              var bankDetails = await authentication.users(widget.phonenumber);
+              String? username = bankDetails!.get("username");
+              String? id = bankDetails.id;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => Investment(
+                        phonenumber: widget.phonenumber,
+                        username: username,
+                        id: id)),
+              );
+            },
+            child: const Text(
+              " + Invest More",
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontFamily: "Poppins-Medium"),
+            ),
           ),
-          FutureBuilder<DocumentSnapshot>(
-              future: bank_details,
-              builder: (context, snapshot) {
-                if (snapshot.hasData && snapshot.requireData.exists) {
-                  var data = snapshot.data;
-                  print(data);
-                  return data!.get("status") == "pending"
-                      ? Container(
-                          child: Center(
-                            child: Text(
-                              " ---------Your bank details is Pending ------- ",
-                              style: TextStyle(color: Colors.pinkAccent),
-                            ),
-                          ),
-                        )
-                      : data.get("status") == "Accept"
-                          ? Container(
-                              child: SizedBox(
-                                child: Container(
-                                  margin:
-                                      EdgeInsets.only(left: 12.3, right: 12.3),
-                                  child: Column(
-                                    children: [
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
-                                      get_currentGains(
-                                          investments, investAmount, gains),
-                                      SizedBox(
-                                        height: 30,
-                                      ),
-                                      Center(
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            TextButton(
-                                                style: TextButton.styleFrom(
-                                                    minimumSize: Size(120, 40),
-                                                    elevation: 0.2,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6.6)),
-                                                    backgroundColor:
-                                                        Colors.grey.shade700),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            withdraw(
-                                                              phonenumber:
-                                                                  phoneNumber,
-                                                            )),
-                                                  );
-                                                },
-                                                child: const Text(
-                                                  "Withdrawl",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      letterSpacing: 0.6,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w900),
-                                                )),
-                                            TextButton(
-                                                style: TextButton.styleFrom(
-                                                    elevation: 0.5,
-                                                    shadowColor: Colors.red,
-                                                    minimumSize: Size(120, 40),
-                                                    backgroundColor:
-                                                        Colors.green,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        6.6))),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Investment(
-                                                              phonenumber:
-                                                                  phoneNumber,
-                                                            )),
-                                                  );
-                                                },
-                                                child: const Text(
-                                                  " + Invest More",
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      letterSpacing: 0.6,
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w900),
-                                                ))
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                          : data.get("status") == "Reject"
-                              ? Column(
-                                  children: [
-                                    Center(
-                                        child: Text(
-                                      "------ Your bank details  is Rejected so  ------",
-                                      style: TextStyle(color: Colors.red),
-                                    )),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Center(
-                                      child: SizedBox(
-                                        width: 180,
-                                        child: TextButton(
-                                          style: TextButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        26.0)),
-                                            backgroundColor: Colors.green,
-                                            elevation: 0.6,
-                                          ),
-                                          onPressed: () async {
-
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      BankAccount(
-                                                        phonenumber:
-                                                            phoneNumber,
-                                                      )),
-                                            );
-                                          },
-                                          child: Text(
-                                            " + Add Bank Details",
-                                            style:
-                                                TextStyle(color: Colors.white),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                )
-                              : Container();
-                } else {
-                  return Center(
-                    child: FutureBuilder<DocumentSnapshot>(
-                      future: bank_details,
-                      builder: (context,snapshot){
-                        if(snapshot.hasData&&snapshot.requireData.exists){
-                          return Container(
-                           child: SizedBox(
-                            width: 180,
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(26.0)),
-                                backgroundColor: Colors.green,
-                                elevation: 0.6,
-                              ),
-                              onPressed: () async {
-                                //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => BankAccount(
-                                        phonenumber: phoneNumber,
-                                      )),
-                                );
-                              },
-                              child: Text(
-                                " + Add Bank Details",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          );
-                        }  return Container(
-                          child: SizedBox(
-                            width: 180,
-                            child: TextButton(
-                              style: TextButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(26.0)),
-                                backgroundColor: Colors.green,
-                                elevation: 0.6,
-                              ),
-                              onPressed: () async {
-                                //var details = await FirebaseFirestore.instance.collection("bank_details").doc(phoneNumber).get();
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => BankAccount(
-                                        phonenumber: phoneNumber,
-                                      )),
-                                );
-                              },
-                              child: Text(
-                                " + Add Bank Details",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                }
-
-                return Center(child: CircularProgressIndicator());
-              })
         ],
-
       ),
     );
   }
 
-  get_invests(invest, investAmount) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: invest,
-      builder: (context, snap) {
-        if (snap.hasData && snap.requireData.exists) {
-          investAmount = snap.data;
-          DocumentSnapshot? documentSnapshot = snap.data;
-          var aafterformat = formatter.format(double.parse(
-              documentSnapshot!.get("InvestAmount").replaceAll(",", "")));
-          return Row(
-            children: [
-              Text("₹ ${aafterformat}",
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16,
-                      fontFamily: "Poppins-Medium")),
-            ],
-          );
-        }
-        return Container();
-      },
-    );
-  }
-
-  get_profit(profit) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: profit,
-      builder: (context, snap) {
-        if (snap.hasData && snap.requireData.exists) {
-          var investment = snap.data;
-          var Todayprofit = investment!.get("Todayprofit");
-          double profit = double.parse(Todayprofit);
-
-          return Row(
-            children: [
-              profit.isNegative
-                  ? const Icon(Icons.arrow_downward,
-                      color: Colors.red, size: 25)
-                  : const Icon(Icons.arrow_upward,
-                      color: Colors.white, size: 20),
-              profit.isNegative
-                  ? Text(
-                      Todayprofit.toString() + "%",
-                      style: TextStyle(
-                          color: Colors.red, letterSpacing: 1.3, fontSize: 16),
-                    )
-                  : Text(Todayprofit.toString() + "%",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 15,
-                          fontFamily: "Poppins-Medium"))
-            ],
-          );
-        }
-        return Container();
-      },
-    );
-  }
-
-  Current_gains(gains) {
-    return Column(
-      children: [
-        FutureBuilder<DocumentSnapshot>(
-            future: gains,
-            builder: (context, snap) {
-              if (snap.hasData && snap.requireData.exists) {
-                var profit = snap.data;
-                return Center(
-                  child: Container(
-                      margin: EdgeInsets.only(bottom: 5.3),
-                      child: Center(
-                          child: Text(
-                        "₹ " + profit!.get("CurrentGains"),
-                        style: TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: "Poppins-Medium",
-                            fontSize: 16),
-                      ))),
-                );
-              }
-              return Container();
-            })
-      ],
-    );
-  }
-
-  get_InvestAmount(Future<DocumentSnapshot<Map<String, dynamic>>> investments,
-      investAmount) {
-    print(MediaQuery.of(context).size.width / 2.58);
+   get_data() {
     return Container(
-      margin: const EdgeInsets.only(left: 12.3),
-      decoration: BoxDecoration(
-          color: Colors.green.shade200,
-          border: Border.all(color: Colors.white),
-          borderRadius: BorderRadius.circular(5.3)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-              width: MediaQuery.of(context).size.width / 2.58,
-              margin: const EdgeInsets.only(
-                  top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Center(
-                      child: Text("Invested Amount",
-                          style: TextStyle(
-                              color: Colors.deepOrange,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Poppins-Medium"))),
-                ],
+        child:Center(
+          child: TextButton(
+              style: TextButton.styleFrom(
+                  padding: const EdgeInsets.all(12.3),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(25.3),
+                  ),
+                  backgroundColor: Colors.green),
+              onPressed: () {
+
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                        builder: (BuildContext
+                        context) =>
+                            BankAccount(
+                                phonenumber: widget
+                                    .phonenumber,
+                                id: widget.id)));
+              },
+              child: const Text(
+                " + Add Bank Details",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    letterSpacing: 0.6),
               )),
-          const SizedBox(
-            height: 5,
-          ),
-          Column(
-            children: [
-              Center(
-                child: Container(
-                  child: get_invests(investments, investAmount),
-                  margin: EdgeInsets.only(bottom: 5.3),
-                ),
-              )
-            ],
-          ),
-        ],
-      ),
+        )
     );
-  }
+   }
 
-  get_currentGains(
-    Future<DocumentSnapshot<Map<String, dynamic>>> investments,
-    investAmount,
-    Future<DocumentSnapshot<Map<String, dynamic>>> gains,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        get_InvestAmount(investments, investAmount),
-        Container(
-          margin: EdgeInsets.only(left: 12.3, right: 12.3),
-          decoration: BoxDecoration(
-              border: Border.all(color: Colors.brown),
-              borderRadius: BorderRadius.circular(5.3)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  margin: const EdgeInsets.only(
-                      top: 5.3, bottom: 3.3, left: 3.3, right: 5.3),
-                  child: const Center(
-                      child: Text(
-                    "Current Gains",
-                    style: TextStyle(
-                        color: Colors.brown, fontWeight: FontWeight.w600),
-                  ))),
-              const SizedBox(
-                height: 5,
-              ),
-              Current_gains(gains),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  get_data() async {
-    var investments = await FirebaseFirestore.instance
-        .collection("Investments")
-        .doc(phoneNumber)
-        .get();
-    return investments.exists;
-  }
-
-  build_name(QuerySnapshot<Object?> user, int index) {
-    return Container(
-      child: Text(
-        "Welcome " + user.docs[index].get("firstname"),
-        style: TextStyle(
-            color: Colors.deepOrange,
-            fontWeight: FontWeight.w600,
-            fontFamily: "Poppins-Medium",
-            fontSize: 16,
-            letterSpacing: 0.3),
-      ),
+  get_gains() {
+    return FutureBuilder<DocumentSnapshot?>(
+      future: authentication.get_curentgains(widget.phonenumber),
+      builder: (context,snapshot){
+        if(snapshot.hasData&&snapshot.requireData!.exists){
+          var gains = snapshot.data;
+          return Container(
+            child: Row(
+              children: [
+                const Text("₹",style: TextStyle(color: Colors.white),),
+                Container(
+                  child: Text(gains!.get("CurrentGains")),
+                )
+              ],
+            ),
+          );
+        }return Center();
+      },
     );
   }
 }

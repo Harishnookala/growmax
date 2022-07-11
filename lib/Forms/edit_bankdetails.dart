@@ -7,7 +7,8 @@ class edit_details extends StatefulWidget {
   String? id;
   String? Accountnumber;
   String? ifsc;
-  edit_details({Key? key, this.id, this.Accountnumber, this.ifsc})
+  String?phonenumber;
+  edit_details({Key? key, this.id, this.Accountnumber, this.ifsc,this.phonenumber})
       : super(key: key);
 
   @override
@@ -39,11 +40,7 @@ class _edit_detailsState extends State<edit_details> {
 
   @override
   Widget build(BuildContext context) {
-    var bank_details = FirebaseFirestore.instance
-        .collection("bank_details")
-        .doc(widget.id)
-        .get();
-  print(widget.id);
+
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
@@ -205,17 +202,17 @@ class _edit_detailsState extends State<edit_details> {
 
         ),
         onPressed: ()async{
+
           Map<String,dynamic>data ={
             "accountnumber":Accountnumber!.text,
             "ifsc":Ifsc!.text,
             "status":"pending"
           };
           await FirebaseFirestore.instance.collection("bank_details").doc(widget.id).update(data);
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) =>  userPannel(phoneNumber: widget.id,)),
-          );
-        },
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  userPannel(phonenumber: widget.phonenumber,)));
+          },
         child: Container(
             margin: EdgeInsets.only(left: 5.3,right: 5.3),
             child: Text("Save & Continue",style: TextStyle(color: Colors.white,fontFamily: "Poppins-Medium"),)),

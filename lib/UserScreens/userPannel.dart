@@ -9,22 +9,20 @@ import 'banking.dart';
 import 'drawer.dart';
 
 class userPannel extends StatefulWidget {
-  String? phoneNumber;
-  userPannel({Key? key, this.phoneNumber}) : super(key: key);
+  String? id;
+  String?phonenumber;
+  String?bank_id;
+  userPannel({Key? key, this.id,this.phonenumber,this.bank_id}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return userPannelState(
-      phoneNumber:this.phoneNumber
-    );
+    return userPannelState();
   }
 }
 
 class userPannelState extends State<userPannel> {
   int? selectedIndex = 0;
-  String? phoneNumber;
-  userPannelState({this.phoneNumber,});
 
 
   bool pressed = true;
@@ -38,10 +36,10 @@ class userPannelState extends State<userPannel> {
   @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
-      Home(phoneNumber:phoneNumber,),
-      Banking(phoneNumber:phoneNumber),
-      Transaction(phoneNumber:phoneNumber),
-      Profile(phoneNumber:phoneNumber)
+      Home(id: widget.id,phonenumber:widget.phonenumber,bank_id:widget.bank_id,),
+      Banking(bank_id:widget.bank_id,phoneNumber: widget.phonenumber,),
+      Transaction(phoneNumber: widget.phonenumber,),
+      Profile(id:widget.id,phoneNumber: widget.phonenumber,)
     ];
     return MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -55,7 +53,7 @@ class userPannelState extends State<userPannel> {
                 const SizedBox(
                   height: 35,
                 ),
-                drawer(phonenumber: phoneNumber,)
+                drawer(phonenumber: widget.phonenumber,)
               ],
             ),
           )),
