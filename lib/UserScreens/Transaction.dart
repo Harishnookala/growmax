@@ -215,9 +215,7 @@ class _TransactionState extends State<Transaction> {
               ],
             );
           } else {
-            return Container(
-              child: Text("₹ " + "0.00"),
-            );
+            return const Text("₹ " + "0.00");
           }
         },
       ),
@@ -362,6 +360,7 @@ class _TransactionState extends State<Transaction> {
           for(int l =0;l<userinvestments.length;l++){
             DateTime dateTime = userinvestments[l].get("CreatedAt").toDate();
             if(userinvestments[l].get("status")=="Accept"&&dates[j]==dateTime){
+              print(userinvestments[l].id);
               var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
               if(userinvestments[l].get("Type")=="Credit"){
                 symbol ="+";

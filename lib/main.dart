@@ -11,10 +11,13 @@ Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  SharedPreferences prefsdata = await SharedPreferences.getInstance();
+   var value = prefsdata.getBool("bank");
+   print(value);
   var token = prefs.getString('phonenumber');
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: token==null?SplashScreen():userPannel(phonenumber: token,)));
+      home: token==null?const SplashScreen():userPannel(phonenumber: token,pressed: value,)));
 }
 
 class MyApp extends StatelessWidget {

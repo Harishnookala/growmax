@@ -400,7 +400,7 @@ class _edit_profileState extends State<edit_profile> {
                    await FirebaseFirestore.instance.collection("Users").doc(widget.id).update(data);
                    Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (BuildContext context) =>
-                            userPannel(phonenumber: widget.mobilenumber,)));
+                            userPannel(phonenumber: widget.mobilenumber,pressed: true,)));
                   }
             },
              child: Text("Submit",style: TextStyle(color: Colors.white,fontSize: 16),),

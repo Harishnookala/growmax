@@ -240,6 +240,7 @@ class _LoginPageState extends State<LoginPage> {
          phoneNumber: '+91' + _mobile.text,
          timeout: const Duration(seconds: 20),
          verificationCompleted: (PhoneAuthCredential credential) async {
+
             var userCredential = await auth.signInWithCredential(credential);
             var user = userCredential.user!.providerData[0].phoneNumber;
               if(user!=null){
@@ -255,6 +256,7 @@ class _LoginPageState extends State<LoginPage> {
               }
             },
          verificationFailed: (FirebaseAuthException e) {
+
            setState(() {
              inProgress = true;
              errorMessage = e.message!;
@@ -262,6 +264,7 @@ class _LoginPageState extends State<LoginPage> {
            });
          },
          codeSent: (String verificationId, int? resendToken) {
+           print(verificationId);
            setState(() {
              errorMessage =
              "Please enter the OTP sent to your mobile number.";
@@ -325,6 +328,7 @@ class _LoginPageState extends State<LoginPage> {
          phoneNumber: '+91' + _mobile.text,
          timeout: const Duration(seconds: 20),
          verificationCompleted: (PhoneAuthCredential credential) async {
+
            var userCredential = await auth.signInWithCredential(credential);
            var user = userCredential.user!.providerData[0].phoneNumber;
            if(user!=null){
@@ -347,6 +351,7 @@ class _LoginPageState extends State<LoginPage> {
            });
          },
          codeSent: (String verificationId, int? resendToken) {
+           print(verificationId);
            setState(() {
              errorMessage =
              "Please enter the OTP sent to your mobile number.";

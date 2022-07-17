@@ -169,7 +169,7 @@ class _withdrawState extends State<withdraw> {
                                    await FirebaseFirestore.instance.collection("requestwithdrawls").add(data);
                                    Navigator.of(context).pushReplacement(MaterialPageRoute(
                                        builder: (BuildContext context) =>
-                                           userPannel(phonenumber: widget.phonenumber,)));
+                                           userPannel(phonenumber: widget.phonenumber,pressed: true,)));
                                  }
 
                                },

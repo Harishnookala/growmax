@@ -22,6 +22,8 @@ class InvestmentState extends State<Investment> {
   bool inprogress = false;
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
+
+  String? error ="";
   InvestmentState({this.id});
   Authentication authentication =Authentication();
   @override
@@ -134,41 +136,49 @@ class InvestmentState extends State<Investment> {
                               ),
                             ),
                           ),
-                          Container(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                  style: TextButton.styleFrom(
-                                      minimumSize: const Size(130, 40),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
-                                      backgroundColor: Colors.deepOrange.shade400),
-                                  onPressed: () async {
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                    minimumSize: const Size(130, 40),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
+                                    backgroundColor: Colors.deepOrange.shade400),
+                                onPressed: () async {
+                                  setState(() {
+                                    var amount = double.parse(creditController.text);
+                                    if(amount>=10000.00){
+                                      pressed = true;
+                                    }
+                                    else{
+                                      pressed = false;
+                                      inprogress = false;
+                                    }
+
+                                  });
+                                  if(formKey.currentState!.validate()&&pressed){
                                     setState((){
                                       inprogress =true;
                                     });
-                                    if(formKey.currentState!.validate()){
-                                      setState((){
-                                        inprogress =true;
-                                      });
-                                      get_data();
-                                    }
+                                    var data = await get_data();
+                                  }
 
-                                  },
+                                },
 
-                                  child: const Text(
-                                    "Invest",
-                                    style: TextStyle(color: Colors.white,fontSize: 15,fontFamily: "Poppins-Medium"),
-                                  ),
+                                child: const Text(
+                                  "Invest",
+                                  style: TextStyle(color: Colors.white,fontSize: 15,fontFamily: "Poppins-Medium"),
                                 ),
-                                inprogress?const Padding(
-                                    padding: EdgeInsets.only(left: 10),
-                                    child: CircularProgressIndicator())
-                                    : Container()
-                              ],
-                            ),
+                              ),
+                              inprogress?const Padding(
+                                  padding: EdgeInsets.only(left: 10),
+                                  child: CircularProgressIndicator())
+                                  : Container()
+                            ],
                           ),
+                          SizedBox(height: 10,),
+                          pressed==true?const Text(""):Text("Minimum amount of investment is 10,000 ")
                         ],
                       ),
                     )
@@ -202,14 +212,18 @@ class InvestmentState extends State<Investment> {
       "Type":  "Credit",
       "username":widget.username,
     };
-    await FirebaseFirestore.instance.collection("requestInvestments").add(data);
-     Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => userPannel(
-            phonenumber: widget.phonenumber,
-          )),
-    );
+    int amount = int.parse(creditController.text);
+    if(amount>=10000){
+      await FirebaseFirestore.instance.collection("requestInvestments").add(data);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => userPannel(
+              phonenumber: widget.phonenumber,
+              pressed: true,
+            )),
+      );
+    }
 
   }
 

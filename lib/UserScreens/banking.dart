@@ -57,21 +57,19 @@ import 'package:growmax/repositories/authentication.dart';
                            child:Row(
                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                              children:  [
-                               Text("Ifsc :- "),
+                               Text("Ifsc :- ".toUpperCase()),
                                Text(details.get("ifsc")),
                              ],
                            ),
                          ),
-                         SizedBox(height: 15,),
+                         const SizedBox(height: 15,),
 
-                         Container(
-                           child:Row(
-                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                             children:  [
-                               Text("Pan Number :- "),
-                               Text(details.get("pannumber")),
-                             ],
-                           ),
+                         Row(
+                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                           children:  [
+                             Text("Pan Number :- "),
+                             Text(details.get("pannumber")),
+                           ],
                          ),
                          SizedBox(height: 15,),
                          Center(

@@ -113,8 +113,6 @@ class Authentication {
 
   Future<DocumentSnapshot?> get_invests(String? username) async {
     var id;
-    var bank_details =
-        await FirebaseFirestore.instance.collection("bank_details").get();
     var investments =
         await FirebaseFirestore.instance.collection("Investments").get();
     for (int j = 0; j < investments.docs.length; j++) {
@@ -133,7 +131,6 @@ class Authentication {
     return null;
   }
 
-  Future<DocumentSnapshot>? balance() {}
 
   Stream<DocumentSnapshot>? get_profit() async* {
     var dates = DateFormat('yyy-dd-MMM').format(DateTime.now());
@@ -143,11 +140,11 @@ class Authentication {
   }
 
   Future<DocumentSnapshot?> get_curentgains(String? phonenumber) async {
-    // var gains = await FirebaseFirestore.instance.collection("Current_gains").get();
     var id;
     var bank_details =
         await FirebaseFirestore.instance.collection("bank_details").get();
     for (int i = 0; i < bank_details.docs.length; i++) {
+
       if (bank_details.docs[i].get("phonenumber") == phonenumber) {
         id = bank_details.docs[i].get("username");
       }

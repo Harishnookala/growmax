@@ -7,9 +7,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:growmax/Custom_widgets/wrappers.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/repositories/authentication.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Pan_deatils extends StatefulWidget {
   String? phonenumber;
@@ -24,6 +26,7 @@ class Pan_deatils extends StatefulWidget {
 
 class _Pan_deatilsState extends State<Pan_deatils> {
   TextEditingController panNumberController = TextEditingController();
+  SharedPreferences? prefsdata;
   final ImagePicker _picker = ImagePicker();
   File? imageFile;
   var url;
@@ -37,6 +40,8 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   Authentication authentication = Authentication();
   final formKey = GlobalKey<FormState>();
   bool inprogress = false;
+
+  bool? pressed;
   void initState() {
     super.initState();
     BackButtonInterceptor.add(myInterceptor);
@@ -177,6 +182,10 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       child: SizedBox(
         //width: MediaQuery.of(context).size.width / 1.2,
         child: TextFormField(
+          inputFormatters: [
+            UpperCaseTextFormatter()
+          ],
+          textCapitalization: TextCapitalization.characters,
           style: const TextStyle(
             fontFamily: "Poppins-Light",
           ),
@@ -280,74 +289,6 @@ class _Pan_deatilsState extends State<Pan_deatils> {
     }
   }
 
-  build_button() {
-    return Container(
-      alignment: Alignment.center,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.green,
-          minimumSize: const Size(170, 48),
-          elevation: 1.0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
-        ),
-        onPressed: () async {
-
-          if (formKey.currentState!.validate()) {
-            image = await image;
-            imageurl = await imageurl;
-            String? bank_id;
-            String? id = await get_id();
-            bank_id = id;
-             if(id ==null){
-               bank_id = "1000";
-             }
-             else if(id!=null){
-              var bank = int.parse(bank_id!)+1;
-               bank_id = bank.toString();
-             }
-
-            if (image != null && imageurl != null && selected_value != null) {
-              setState(() {
-                inprogress = true;
-              });
-
-              Map<String, dynamic> data = {
-                "name":name,
-                "accountnumber": widget.accountnumber,
-                "ifsc": widget.Ifsc,
-                "phonenumber": widget.phonenumber,
-                "pannumber": panNumberController.text,
-                "image": image,
-                "validationproof": imageurl,
-                "proof": selected_value,
-                "status": "pending",
-                "username":null,
-              };
-
-              var bank_details = await FirebaseFirestore.instance
-                  .collection("bank_details").doc(bank_id.toString()).set(data);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => userPannel(
-                        phonenumber: widget.phonenumber,
-                         bank_id:bank_id,
-                        )),
-              );
-            }
-          }
-        },
-        child: Container(
-            margin: EdgeInsets.only(left: 5.3, right: 5.3),
-            child: Text(
-              "Save & Continue",
-              style:
-                  TextStyle(color: Colors.white,fontSize: 16, fontFamily: "Poppins-Medium"),
-            )),
-      ),
-    );
-  }
 
   get_permissions() {
     showModalBottomSheet(
@@ -620,4 +561,76 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       return null;
     }
   }
+  build_button() {
+    return Container(
+      alignment: Alignment.center,
+      child: TextButton(
+        style: TextButton.styleFrom(
+          backgroundColor: Colors.green,
+          minimumSize: const Size(170, 48),
+          elevation: 1.0,
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
+        ),
+        onPressed: () async {
+
+          if (formKey.currentState!.validate()) {
+            image = await image;
+            imageurl = await imageurl;
+            String? bank_id;
+            String? id = await get_id();
+            bank_id = id;
+            if(id ==null){
+              bank_id = "1000";
+            }
+            else if(id!=null){
+              var bank = int.parse(bank_id!)+1;
+              bank_id = bank.toString();
+            }
+
+            if (image != null && imageurl != null && selected_value != null) {
+              setState(() {
+                inprogress = true;
+              });
+
+              Map<String, dynamic> data = {
+                "name":name,
+                "accountnumber": widget.accountnumber,
+                "ifsc": widget.Ifsc,
+                "phonenumber": widget.phonenumber,
+                "pannumber": panNumberController.text,
+                "image": image,
+                "validationproof": imageurl,
+                "proof": selected_value,
+                "status": "pending",
+                "username":null,
+              };
+             pressed =true;
+              var bank_details = await FirebaseFirestore.instance
+                  .collection("bank_details").doc(bank_id.toString()).set(data);
+              prefsdata = await SharedPreferences.getInstance();
+              prefsdata!.setBool("bank", true);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => userPannel(
+                      phonenumber: widget.phonenumber,
+                      bank_id:bank_id,
+                      pressed: pressed,
+                    )),
+              );
+            }
+          }
+        },
+        child: Container(
+            margin: EdgeInsets.only(left: 5.3, right: 5.3),
+            child: Text(
+              "Save & Continue",
+              style:
+              TextStyle(color: Colors.white,fontSize: 16, fontFamily: "Poppins-Medium"),
+            )),
+      ),
+    );
+  }
+
 }

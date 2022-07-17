@@ -30,7 +30,7 @@ class _profitState extends State<profit> {
               onPressed: () {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (BuildContext context) =>
-                        userPannel(phonenumber: widget.phonenumber)));
+                        userPannel(phonenumber: widget.phonenumber,pressed: true,)));
               },
               child: Icon(
                 Icons.arrow_back_ios_rounded,

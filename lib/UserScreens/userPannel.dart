@@ -12,7 +12,8 @@ class userPannel extends StatefulWidget {
   String? id;
   String?phonenumber;
   String?bank_id;
-  userPannel({Key? key, this.id,this.phonenumber,this.bank_id}) : super(key: key);
+  bool?pressed;
+  userPannel({Key? key, this.id,this.phonenumber,this.bank_id,this.pressed}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -36,7 +37,7 @@ class userPannelState extends State<userPannel> {
   @override
   Widget build(BuildContext context) {
     List<Widget> _widgetOptions = <Widget>[
-      Home(id: widget.id,phonenumber:widget.phonenumber,bank_id:widget.bank_id,),
+      Home(id: widget.id,phonenumber:widget.phonenumber,bank_id:widget.bank_id,pressed: widget.pressed,),
       Banking(bank_id:widget.bank_id,phoneNumber: widget.phonenumber,),
       Transaction(phoneNumber: widget.phonenumber,),
       Profile(id:widget.id,phoneNumber: widget.phonenumber,)

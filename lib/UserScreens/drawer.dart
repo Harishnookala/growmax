@@ -81,30 +81,7 @@ class _drawerState extends State<drawer> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.only(bottom: 12.3, top: 12.3),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        onPressed: () async{
-                         var details =  await FirebaseFirestore.instance.collection("nominee_details").doc(widget.phonenumber).get();
-                          if(details.exists){
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    shownnominee(phonenumber: widget.phonenumber,)));
-                          }
-                          else{
-                            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                builder: (BuildContext context) =>
-                                    Nominee_details(phonenumber: widget.phonenumber,)));
-                          }
-                         },
-                        child: Text(
-                          "Nominee Details",
-                          style: TextStyle(
-                              color: Colors.lightBlueAccent,
-                              fontFamily: "Poppins-Medium"),
-                        )),
+
                     Row(
                       children: [
                         TextButton(

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:growmax/Custom_widgets/wrappers.dart';
 
 import '../UserScreens/userPannel.dart';
 import 'Pan_details.dart';
@@ -209,6 +210,10 @@ class _BankAccountState extends State<BankAccount> {
     return SizedBox(
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        inputFormatters: [
+          UpperCaseTextFormatter(),
+        ],
+        textCapitalization: TextCapitalization.characters,
         style: TextStyle(fontFamily: "Poppins-Light",),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -218,6 +223,7 @@ class _BankAccountState extends State<BankAccount> {
         },
         controller: Ifsc,
         decoration: InputDecoration(
+
             contentPadding:  const EdgeInsets.symmetric(vertical: 17.0, horizontal: 10.0),
 
             focusedBorder: const OutlineInputBorder(

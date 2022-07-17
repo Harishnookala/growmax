@@ -45,12 +45,23 @@ class _ProfileState extends State<Profile> {
                           return Column(
                             children: [
                               Container(
+                                margin: EdgeInsets.only(bottom: 8.3),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("Username :-"),
+                                    users!.get("username")!=null?Text(users.get("username")):Container()
+                                  ],
+                                ),
+                              ),
+                              Container(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text("Name :-"),
-                                    Text(users!.get("firstname"))
+                                    Text(users.get("firstname"))
                                   ],
                                 ),
                                 margin: EdgeInsets.only(bottom: 8.3),

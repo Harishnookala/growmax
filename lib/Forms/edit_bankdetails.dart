@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Custom_widgets/wrappers.dart';
 
 class edit_details extends StatefulWidget {
   String? id;
@@ -19,6 +24,8 @@ class _edit_detailsState extends State<edit_details> {
   TextEditingController? Accountnumber;
   TextEditingController? RenterAccount;
   TextEditingController? Ifsc;
+  final formKey = GlobalKey<FormState>();
+
   void initState() {
     Accountnumber = TextEditingController();
     Accountnumber!.text = widget.Accountnumber!;
@@ -63,6 +70,7 @@ class _edit_detailsState extends State<edit_details> {
             ),
             Expanded(
                 child: Form(
+                  key: formKey,
               child: SingleChildScrollView(
                 child: Container(
                   margin: EdgeInsets.only(left: 20.6, right: 20.6),
@@ -102,6 +110,7 @@ class _edit_detailsState extends State<edit_details> {
                         height: 13,
                       ),
                       build_Ifsc(),
+
                       SizedBox(height: 13,),
                       build_button(),
                     ],
@@ -115,12 +124,18 @@ class _edit_detailsState extends State<edit_details> {
 
   build_account(String? accountnumber) {
       return SizedBox(
-        height: 53,
         width: MediaQuery.of(context).size.width/1.2,
         child: TextFormField(
+          validator: (value) {
+            if (value == null || value.isEmpty || !value.isNum) {
+              return 'Please enter Valid Account number';
+            }
+            return null;
+          },
           style: TextStyle(fontFamily: "Poppins-Light",),
           controller: Accountnumber,
           decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),
               focusedBorder: const OutlineInputBorder(
                 borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
               ),
@@ -143,12 +158,21 @@ class _edit_detailsState extends State<edit_details> {
 
   build_reenterAccount() {
     return SizedBox(
-      height: 53,
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        validator: (value) {
+          if (value == null || value.isEmpty||!value.isNum) {
+            return 'Please enter Account number';
+          }
+          else if(Accountnumber!.text!=RenterAccount!.text){
+            return "Account number does not matches";
+          }
+          return null;
+        },
         style: TextStyle(fontFamily: "Poppins-Light",),
-        controller: Accountnumber,
+        controller: RenterAccount,
         decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(vertical: 10,horizontal: 10),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -168,12 +192,24 @@ class _edit_detailsState extends State<edit_details> {
 
   build_Ifsc() {
     return SizedBox(
-      height: 53,
+
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter Valid ifsc number';
+          }
+          return null;
+        },
+        inputFormatters: [
+          UpperCaseTextFormatter(),
+        ],
+        keyboardType: TextInputType.text,
+        textCapitalization: TextCapitalization.characters,
         style: TextStyle(fontFamily: "Poppins-Light",),
         controller: Ifsc,
         decoration: InputDecoration(
+            contentPadding:  const EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
             focusedBorder: const OutlineInputBorder(
               borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
             ),
@@ -202,16 +238,25 @@ class _edit_detailsState extends State<edit_details> {
 
         ),
         onPressed: ()async{
+             if(formKey.currentState!.validate()){
+               if(widget.Accountnumber!=Accountnumber!.text || widget.ifsc!=Ifsc!.text){
+                 Map<String,dynamic> data = {
+                   "accountnumber":Accountnumber!.text,
+                   "ifsc":Ifsc!.text,
+                   "status":"pending"
+                 };
+                 await FirebaseFirestore.instance.collection("bank_details").doc(widget.id).update(data);
+                 Navigator.of(context).pushReplacement(MaterialPageRoute(
+                     builder: (BuildContext context) =>
+                         userPannel(phonenumber: widget.phonenumber,pressed: true,)));
+               }
+               else{
+                 Navigator.of(context).pushReplacement(MaterialPageRoute(
+                     builder: (BuildContext context) =>
+                         userPannel(phonenumber: widget.phonenumber,pressed: true,)));
+               }
+             }
 
-          Map<String,dynamic>data ={
-            "accountnumber":Accountnumber!.text,
-            "ifsc":Ifsc!.text,
-            "status":"pending"
-          };
-          await FirebaseFirestore.instance.collection("bank_details").doc(widget.id).update(data);
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  userPannel(phonenumber: widget.phonenumber,)));
           },
         child: Container(
             margin: EdgeInsets.only(left: 5.3,right: 5.3),
@@ -221,3 +266,4 @@ class _edit_detailsState extends State<edit_details> {
   }
 
 }
+
