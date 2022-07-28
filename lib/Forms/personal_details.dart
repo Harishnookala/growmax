@@ -73,6 +73,7 @@ class _personal_detailsState extends State<personal_details> {
                     Expanded(
                       child: ListView(
                         shrinkWrap: true,
+                        padding: EdgeInsets.only(top: 12.3),
                         scrollDirection: Axis.vertical,
                         children: [
                           Container(
@@ -175,6 +176,7 @@ class _personal_detailsState extends State<personal_details> {
                                 buildMotherName(),
                                 SizedBox(height: 10,),
                                 Container(
+                                  margin: const EdgeInsets.only(bottom: 8.5),
                                   child: const Text(
                                     "Profile picture : -",
                                     style: TextStyle(
@@ -184,7 +186,6 @@ class _personal_detailsState extends State<personal_details> {
                                         fontSize: 15,
                                         fontFamily: "Poppins-Medium"),
                                   ),
-                                  margin: const EdgeInsets.only(bottom: 8.5),
                                 ),
                                 SizedBox(height: 20,),
                                 Center(child:buildPanPhoto() ,),
@@ -374,7 +375,7 @@ class _personal_detailsState extends State<personal_details> {
             margin: EdgeInsets.only(right: 16.3),
             alignment: Alignment.centerRight,
             child: InkWell(
-              child: Icon(Icons.date_range_outlined),
+              child: Icon(Icons.date_range_outlined,color: Colors.blue),
               onTap: ()async{
                   pickupDate = await showDatePicker(context: context,
                     initialDate:
@@ -551,9 +552,9 @@ class _personal_detailsState extends State<personal_details> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.6)),
         ),
         onPressed: (){
+          print(image);
            if(formKey.currentState!.validate()&&image!=null&&date!=null&&selected_value!=null&&status!=null)
-             Navigator.push(
-               context,
+             Navigator.of(context).push(
                MaterialPageRoute(builder: (context) =>
                    Address(firstname:nameController.text,
                      lastname:lastNameContoller.text,

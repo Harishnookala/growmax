@@ -157,4 +157,28 @@ class Authentication {
     }
     return null;
   }
+
+ Future<String?> movetoinvestements(image_url, name) async {
+    print(name);
+    if (image_url != null) {
+      final ref =
+      FirebaseStorage.instance.ref("details/$name").child(name! + ".jpeg");
+      await ref.putFile(image_url);
+      var url = await ref.getDownloadURL();
+      return url;
+    }
+  }
+
+  Future<String>username(String? phonenumber) async {
+    var username;
+    var bank_details =
+        await FirebaseFirestore.instance.collection("bank_details").get();
+    for (int i = 0; i < bank_details.docs.length; i++) {
+      if (bank_details.docs[i].get("phonenumber") == phonenumber) {
+        username = bank_details.docs[i].get("username");
+      }
+    }
+    print(username);
+     return username;
+  }
 }

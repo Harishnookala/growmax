@@ -41,7 +41,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   final formKey = GlobalKey<FormState>();
   bool inprogress = false;
 
-  bool? pressed;
+  bool? pressed = true;
   void initState() {
     super.initState();
     BackButtonInterceptor.add(myInterceptor);
@@ -56,6 +56,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
     return true;
   }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -66,16 +67,24 @@ class _Pan_deatilsState extends State<Pan_deatils> {
           padding: EdgeInsets.zero,
           physics: const BouncingScrollPhysics(),
           children: [
-            const SizedBox(height: 13,),
+            const SizedBox(
+              height: 13,
+            ),
             Container(
               margin: EdgeInsets.zero,
               alignment: Alignment.topLeft,
-              child: IconButton(onPressed: (){
-                   Navigator.pop(context);
-              }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
+              child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_outlined,
+                    color: Colors.deepOrangeAccent,
+                    size: 19,
+                  )),
             ),
             Container(
-              margin: const EdgeInsets.only(left: 15.3,right: 15.3),
+              margin: const EdgeInsets.only(left: 15.3, right: 15.3),
               child: Form(
                 key: formKey,
                 child: ListView(
@@ -84,10 +93,12 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                   shrinkWrap: true,
                   children: [
                     Divider(
-                        height: 1, thickness: 1.5, color: Colors.green.shade400),
+                        height: 1,
+                        thickness: 1.5,
+                        color: Colors.green.shade400),
                     Container(
-                        margin:
-                            EdgeInsets.only(left: 14.3, right: 15.3, bottom: 4.3),
+                        margin: EdgeInsets.only(
+                            left: 14.3, right: 15.3, bottom: 4.3),
                         child: Text(
                           "Pan Details",
                           style: TextStyle(
@@ -96,7 +107,9 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                               fontFamily: "Poppins-Medium"),
                         )),
                     Divider(
-                        height: 1, thickness: 1.5, color: Colors.green.shade400),
+                        height: 1,
+                        thickness: 1.5,
+                        color: Colors.green.shade400),
                     Container(
                       margin: EdgeInsets.only(left: 12.3),
                       child: ListView(
@@ -151,8 +164,36 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              build_button(),
+                              pressed!
+                                  ? build_button()
+                                  : Center(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.grey,
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        25.3)),
+                                            child: Center(
+                                                child: Text("Save & Continue",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16),
+                                                    textAlign:
+                                                        TextAlign.center)),
+                                            width: 180,
+                                            height: 40,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                               inprogress
                                   ? Padding(
                                       padding: EdgeInsets.only(left: 12.3),
@@ -182,9 +223,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       child: SizedBox(
         //width: MediaQuery.of(context).size.width / 1.2,
         child: TextFormField(
-          inputFormatters: [
-            UpperCaseTextFormatter()
-          ],
+          inputFormatters: [UpperCaseTextFormatter()],
           textCapitalization: TextCapitalization.characters,
           style: const TextStyle(
             fontFamily: "Poppins-Light",
@@ -261,7 +300,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                   },
                   child: Text(
                     "Upload Pan",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ))
         ],
       ),
@@ -269,15 +308,12 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   }
 
   _getFromGallery() async {
-
     XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
     );
     var users = await FirebaseFirestore.instance.collection("Users").get();
     for (int i = 0; i < users.docs.length; i++) {
-
       if (users.docs[i].get("mobilenumber") == widget.phonenumber) {
-
         name = users.docs[i].get("firstname");
       }
     }
@@ -288,7 +324,6 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       });
     }
   }
-
 
   get_permissions() {
     showModalBottomSheet(
@@ -490,7 +525,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                   },
                   child: Text(
                     "Upload Proof",
-                    style: TextStyle(color: Colors.white),
+                    style: TextStyle(color: Colors.white, fontSize: 15),
                   ))
         ],
       ),
@@ -548,19 +583,20 @@ class _Pan_deatilsState extends State<Pan_deatils> {
     }
   }
 
-  get_id() async{
+  get_id() async {
     var id;
-    var data  = await FirebaseFirestore.instance.collection("bank_details").get();
-    for(int i =0;i<data.docs.length;i++){
+    var data =
+        await FirebaseFirestore.instance.collection("bank_details").get();
+    for (int i = 0; i < data.docs.length; i++) {
       id = data.docs[i].id;
     }
-    if(id!=null){
+    if (id != null) {
       return id;
-    }
-    else{
+    } else {
       return null;
     }
   }
+
   build_button() {
     return Container(
       alignment: Alignment.center,
@@ -570,31 +606,28 @@ class _Pan_deatilsState extends State<Pan_deatils> {
           minimumSize: const Size(170, 48),
           elevation: 1.0,
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
         ),
         onPressed: () async {
-
-          if (formKey.currentState!.validate()) {
+          if (image != null && imageurl != null && selected_value != null) {
             image = await image;
             imageurl = await imageurl;
             String? bank_id;
             String? id = await get_id();
             bank_id = id;
-            if(id ==null){
+            if (id == null) {
               bank_id = "1000";
-            }
-            else if(id!=null){
-              var bank = int.parse(bank_id!)+1;
+            } else if (id != null) {
+              var bank = int.parse(bank_id!) + 1;
               bank_id = bank.toString();
             }
-
-            if (image != null && imageurl != null && selected_value != null) {
+            if (formKey.currentState!.validate()) {
               setState(() {
                 inprogress = true;
+                pressed = false;
               });
-
               Map<String, dynamic> data = {
-                "name":name,
+                "name": name,
                 "accountnumber": widget.accountnumber,
                 "ifsc": widget.Ifsc,
                 "phonenumber": widget.phonenumber,
@@ -603,21 +636,23 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                 "validationproof": imageurl,
                 "proof": selected_value,
                 "status": "pending",
-                "username":null,
+                "username": null,
               };
-             pressed =true;
+              pressed = true;
               var bank_details = await FirebaseFirestore.instance
-                  .collection("bank_details").doc(bank_id.toString()).set(data);
+                  .collection("bank_details")
+                  .doc(bank_id.toString())
+                  .set(data);
               prefsdata = await SharedPreferences.getInstance();
               prefsdata!.setBool("bank", true);
               Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => userPannel(
-                      phonenumber: widget.phonenumber,
-                      bank_id:bank_id,
-                      pressed: pressed,
-                    )),
+                          phonenumber: widget.phonenumber,
+                          bank_id: bank_id,
+                          pressed: pressed,
+                        )),
               );
             }
           }
@@ -626,11 +661,12 @@ class _Pan_deatilsState extends State<Pan_deatils> {
             margin: EdgeInsets.only(left: 5.3, right: 5.3),
             child: Text(
               "Save & Continue",
-              style:
-              TextStyle(color: Colors.white,fontSize: 16, fontFamily: "Poppins-Medium"),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontFamily: "Poppins-Medium"),
             )),
       ),
     );
   }
-
 }

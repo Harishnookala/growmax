@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/UserScreens/withdraw.dart';
+import 'package:growmax/repositories/authentication.dart';
 import 'package:intl/intl.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 
@@ -15,6 +16,8 @@ class pending_requests extends StatefulWidget {
 }
 
 class _pending_requestsState extends State<pending_requests> {
+  Authentication authentication = Authentication();
+
   var requestinvestments =
       FirebaseFirestore.instance.collection("requestInvestments").snapshots();
   var requestWithdrawls =
@@ -84,7 +87,16 @@ class _pending_requestsState extends State<pending_requests> {
                       ),
                      Container(
                        margin: EdgeInsets.only(top: 6.5,bottom: 6.5),
-                       child: build_pendingrequests(),
+                       child: FutureBuilder<DocumentSnapshot?>(
+                         future: authentication.users(widget.phonenumber),
+                         builder: (context,snap){
+                           if(snap.hasData){
+                             var user = snap.data;
+
+                             return build_pendingrequests(user!.get("username"));
+                           }return Container();
+                         },
+                       )
                      )
                     ],
                   )
@@ -97,7 +109,7 @@ class _pending_requestsState extends State<pending_requests> {
     );
   }
 
-  build_pendingrequests() {
+  build_pendingrequests(username) {
     return Container(
       child: StreamBuilder<QuerySnapshot>(
         stream: requestinvestments,
@@ -112,7 +124,7 @@ class _pending_requestsState extends State<pending_requests> {
                       snapshot.data!.docs;
                   userinvestments.addAll(userwithdrawls);
                   List dates = get_dates(userinvestments);
-                  List? transactions = get_transactions(dates, userinvestments,widget.username);
+                  List? transactions = get_transactions(dates, userinvestments,username);
 
                   return Container(
                     margin: EdgeInsets.only(bottom: 5.6),

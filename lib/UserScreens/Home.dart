@@ -26,12 +26,9 @@ class Home extends StatefulWidget {
 }
 
 class HomeState extends State<Home> {
-
   var data;
-
   var formatter = NumberFormat('#,##0.${"#" * 5}');
   Authentication authentication = Authentication();
-
   String? value;
   void initState() {
     super.initState();
@@ -50,6 +47,7 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    print(widget.phonenumber);
     return Container(
       child: ListView(
         shrinkWrap: true,
@@ -224,7 +222,6 @@ class HomeState extends State<Home> {
                                     ),
                                     backgroundColor: Colors.green),
                                 onPressed: () async {
-
                                   Navigator.of(context).pushReplacement(
                                       MaterialPageRoute(
                                           builder: (BuildContext context) =>
@@ -295,6 +292,27 @@ class HomeState extends State<Home> {
         ],
       ),
     );
+  }
+  get_data() {
+    return widget.pressed==null?Center(
+      child: TextButton(
+          style: TextButton.styleFrom(
+              padding: const EdgeInsets.all(12.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.3),
+              ),
+              backgroundColor: Colors.green),
+          onPressed: () async {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+                builder: (BuildContext context) => BankAccount(
+                    phonenumber: widget.phonenumber, id: widget.id)));
+          },
+          child: const Text(
+            " + Add Bank Details",
+            style: TextStyle(
+                color: Colors.white, fontSize: 15, letterSpacing: 0.6),
+          )),
+    ):Container();
   }
 
   build_data() {
@@ -420,34 +438,34 @@ class HomeState extends State<Home> {
           if (snapshot.hasData && snapshot.requireData!.exists) {
             var profit = snapshot.data;
             var Todayprofit = profit!.get("Todayprofit");
-            double after_profit = double.parse(Todayprofit);
+            double afterProfit = double.parse(Todayprofit);
             return Row(
               children: [
-                after_profit.isNegative
+                afterProfit.isNegative
                     ? Container(
-                        margin: const EdgeInsets.only(left: 2.3),
-                        child: const Icon(Icons.arrow_downward,
-                            color: Colors.red, size: 25),
-                      )
+                  margin: const EdgeInsets.only(left: 2.3),
+                  child: const Icon(Icons.arrow_downward,
+                      color: Colors.red, size: 25),
+                )
                     : Container(
-                        margin: const EdgeInsets.only(left: 2.3),
-                        child: const Icon(Icons.arrow_upward,
-                            color: Colors.white, size: 20),
-                      ),
-                after_profit.isNegative
+                  margin: const EdgeInsets.only(left: 2.3),
+                  child: const Icon(Icons.arrow_upward,
+                      color: Colors.white, size: 20),
+                ),
+                afterProfit.isNegative
                     ? Text(
-                        Todayprofit.toString() + "%",
-                        style: TextStyle(
-                            color: Colors.red,
-                            letterSpacing: 1.3,
-                            fontSize: 16),
-                      )
+                  Todayprofit.toString() + "%",
+                  style: TextStyle(
+                      color: Colors.red,
+                      letterSpacing: 1.3,
+                      fontSize: 16),
+                )
                     : Text(Todayprofit.toString() + "%",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 15,
-                            fontFamily: "Poppins-Medium"))
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 15,
+                        fontFamily: "Poppins-Medium"))
               ],
             );
           }
@@ -524,31 +542,6 @@ class HomeState extends State<Home> {
     );
   }
 
-  get_data() {
-    print(widget.pressed);
-    return widget.pressed==null?Container(
-        child: Center(
-      child: TextButton(
-          style: TextButton.styleFrom(
-              padding: const EdgeInsets.all(12.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25.3),
-              ),
-              backgroundColor: Colors.green),
-          onPressed: () async {
-
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (BuildContext context) => BankAccount(
-                    phonenumber: widget.phonenumber, id: widget.id)));
-          },
-          child: const Text(
-            " + Add Bank Details",
-            style: TextStyle(
-                color: Colors.white, fontSize: 15, letterSpacing: 0.6),
-          )),
-    )):Container();
-  }
-
   get_gains() {
     return FutureBuilder<DocumentSnapshot?>(
       future: authentication.get_curentgains(widget.phonenumber),
@@ -565,7 +558,7 @@ class HomeState extends State<Home> {
               ),
               Text(" ₹ $afterFormat",
                 style: const TextStyle(color: Colors.green,
-                  fontFamily: "Poppins-Medium"
+                    fontFamily: "Poppins-Medium"
                 ),)
             ],
           );
@@ -574,4 +567,6 @@ class HomeState extends State<Home> {
       },
     );
   }
+
+
 }

@@ -92,7 +92,7 @@ class _drawerState extends State<drawer> {
                             onPressed: () {
                               Navigator.of(context).pushReplacement(MaterialPageRoute(
                                   builder: (BuildContext context) =>
-                                      pending_requests(phonenumber: widget.phonenumber,username:users.get("username"))));
+                                      pending_requests(phonenumber: widget.phonenumber)));
                             },
                             child: Text(
                               "Pending requests",

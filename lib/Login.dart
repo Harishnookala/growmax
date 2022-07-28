@@ -1,3 +1,4 @@
+import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,20 @@ class _LoginPageState extends State<LoginPage> {
   var id;
   var mobilenumber;
   @override
+  void initState() {
+    super.initState();
+    BackButtonInterceptor.add(myInterceptor);
+  }
+
+  @override
+  void dispose() {
+    BackButtonInterceptor.remove(myInterceptor);
+    super.dispose();
+  }
+  bool myInterceptor(bool stopDefaultButtonEvent, RouteInfo info) {
+    return true;
+  }
+
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -107,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: (){
                           get_otp(verificationId);
                         },
-                        child: Text("Resend Otp",style: TextStyle(color: Colors.pinkAccent,
+                        child: const Text("Resend Otp",style: TextStyle(color: Colors.pinkAccent,
                             fontSize: 16,
                             decoration: TextDecoration.underline,fontWeight: FontWeight.w600),),
                       ),
@@ -115,9 +130,14 @@ class _LoginPageState extends State<LoginPage> {
                     GestureDetector(
                       onTap: () async {
                          get_data();
+                        UserCredential user = await FirebaseAuth.instance.signInAnonymously() ;
+                        print(user.user!.uid);
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        decoration: BoxDecoration(
+                            color: Colors.green.shade400,
+                            borderRadius: BorderRadius.all(const Radius.circular(5.0))),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -134,9 +154,6 @@ class _LoginPageState extends State<LoginPage> {
                                 : Container()
                           ],
                         ),
-                        decoration: BoxDecoration(
-                            color: Colors.green.shade400,
-                            borderRadius: BorderRadius.all(const Radius.circular(5.0))),
                       ),
                     ),
                     Padding(
@@ -238,7 +255,6 @@ class _LoginPageState extends State<LoginPage> {
        });
        await FirebaseAuth.instance.verifyPhoneNumber(
          phoneNumber: '+91' + _mobile.text,
-         timeout: const Duration(seconds: 20),
          verificationCompleted: (PhoneAuthCredential credential) async {
 
             var userCredential = await auth.signInWithCredential(credential);

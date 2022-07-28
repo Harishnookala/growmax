@@ -19,7 +19,6 @@ class mainScreenState extends State<mainScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           Expanded(
             child: Center(
               child: Container(
@@ -29,10 +28,10 @@ class mainScreenState extends State<mainScreen> {
                   children: [
                     CircleAvatar(
                       backgroundColor: Colors.black,
-                      radius: 120,
+                      radius: 80,
                       child: CircleAvatar(
                         radius: 100,
-                        backgroundImage: AssetImage('assets/Images/app_image.jpg'),
+                        backgroundImage: AssetImage('assets/Images/play_store.jpg'),
                       ),
                     ),
 

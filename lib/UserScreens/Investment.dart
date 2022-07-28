@@ -1,15 +1,23 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:external_app_launcher/external_app_launcher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:growmax/UserScreens/payments.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/repositories/authentication.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Investment extends StatefulWidget {
   String? id;
-  String?phonenumber;
-  String?username;
-  Investment({Key? key, this.id,this.phonenumber,this.username}) : super(key: key);
+  String? phonenumber;
+  String? username;
+  Investment({Key? key, this.id, this.phonenumber, this.username})
+      : super(key: key);
 
   @override
   InvestmentState createState() => InvestmentState(id: this.id);
@@ -22,30 +30,40 @@ class InvestmentState extends State<Investment> {
   bool inprogress = false;
   bool pressed = true;
   final formKey = GlobalKey<FormState>();
-
-  String? error ="";
+  final ImagePicker _picker = ImagePicker();
+  String? error = "";
+  var image_url;
+  var image;
   InvestmentState({this.id});
-  Authentication authentication =Authentication();
+  Authentication authentication = Authentication();
+  DocumentSnapshot<Object?>? amount;
+
   @override
   Widget build(BuildContext context) {
-    DocumentSnapshot<Object?>?amount;
+    var upi = FirebaseFirestore.instance.collection("Upi").doc("upi").get();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: Column(
+        body: ListView(
+          physics: BouncingScrollPhysics(),
+          padding: EdgeInsets.only(top: 10.3),
+          shrinkWrap: true,
           children: [
-            const SizedBox(
-              height: 10,
-            ),
             Container(
-                margin: EdgeInsets.all(12.3),
+                margin: EdgeInsets.all(8.3),
                 child: Column(
                   children: [
                     Container(
                       alignment: Alignment.topLeft,
-                      child: IconButton(onPressed: (){
-                        Navigator.pop(context);
-                      }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
+                      child: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_outlined,
+                            color: Colors.deepOrangeAccent,
+                            size: 19,
+                          )),
                     ),
                     Center(
                       child: Column(
@@ -64,125 +82,162 @@ class InvestmentState extends State<Investment> {
                       ),
                     ),
                     FutureBuilder<DocumentSnapshot?>(
-                      future: authentication.get_invests(widget.username) ,
+                      future: authentication.get_invests(widget.username),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.requireData!.exists) {
                           amount = snapshot.data;
-                          return Text("₹ " +
-                            amount!.get("InvestAmount"),
+                          return Text(
+                            "₹ " + amount!.get("InvestAmount"),
                             style: const TextStyle(
                                 color: Colors.blue,
                                 fontSize: 16,
                                 fontFamily: "Poppins-Medium"),
                           );
-                        } else{
-                          return Text("₹ 0.0",style: TextStyle(color: Colors.blue,fontSize: 16),);
+                        } else {
+                          return Text(
+                            "₹ 0.0",
+                            style: TextStyle(color: Colors.blue, fontSize: 16),
+                          );
                         }
-
-
                       },
                     ),
+                    Divider(
+                      color: Colors.grey,
+                      thickness: 1.0,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 10.3, top: 10.3),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            child: const Text(
+                              "Upi id : - ",
+                              style: TextStyle(
+                                  color: Colors.brown,
+                                  fontFamily: "Poppins-Medium"),
+                            ),
+                          ),
+                          Expanded(
+                              child: FutureBuilder<DocumentSnapshot>(
+                            future: upi,
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                var details = snapshot.data;
+                                return Row(
+                                  children: [
+                                    Container(
+                                      margin: const EdgeInsets.only(right: 9.3),
+                                      child: Text(
+                                        details!.get("upi"),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            color: Colors.blueAccent,
+                                            fontSize: 15,
+                                            fontFamily: "Poppins-Medium"),
+                                      ),
+                                    ),
+                                    Container(
+                                      child: InkWell(
+                                        child: const Icon(Icons.copy_all,
+                                            color: Colors.green, size: 28),
+                                        hoverColor: Colors.blueAccent,
+                                        highlightColor: Colors.blueAccent,
+                                        onTap: () {
+                                          Clipboard.setData(ClipboardData(
+                                              text: details.get("upi")));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return Container();
+                            },
+                          ))
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(
+                        child: TextButton(
+                            style: TextButton.styleFrom(
+                                minimumSize: Size(160, 38),
+                                backgroundColor: Colors.deepOrange.shade500,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.3))),
+                            onPressed: () {
+                              showModalBottomSheet(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return build_upi();
+                                },
+                              );
+                            },
+                            child: Text(
+                              "Pay using Upi",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 15),
+                            ))),
                     const SizedBox(
                       height: 20,
                     ),
                     Container(
-                      margin: EdgeInsets.only(left: 16.3, bottom: 5.3),
-                      alignment: Alignment.topLeft,
-                      child: Text(
-                        "Invest Amount",
-                        style: TextStyle(color: Colors.deepOrange),
+                      child: const Text(
+                        "Add payment Screenshot : -",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.deepOrangeAccent,
+                            letterSpacing: 0.6,
+                            fontSize: 15,
+                            fontFamily: "Poppins-Medium"),
                       ),
+                      margin: const EdgeInsets.only(bottom: 8.5),
                     ),
-                    Form(
-                        key: formKey,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                           width:MediaQuery.of(context).size.width/1.3,
-                            child: Container(
-                              margin: const EdgeInsets.only(
-                                  top: 5.8, left: 6.3, bottom: 12.3),
-                              child: TextFormField(
-                                validator: (amount) {
-                                  if (amount!.isEmpty||!amount.isNum) {
-                                    return 'Please enter Amount';
-                                  }
-                                  return null;
-                                },
-                                decoration: InputDecoration(
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                                    prefix: Container(
-                                      margin: const EdgeInsets.only(right: 8.3),
-                                      child: const Text("₹",
-                                          style: TextStyle(fontSize: 15)),
-                                    ),
-                                    focusedBorder: const OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Colors.greenAccent, width: 2.0),
-                                    ),
-                                    labelText: "Enter Amount",
-                                    labelStyle:
-                                    const TextStyle(color: Color(0xff576630)),
-                                    border: OutlineInputBorder(
-                                      gapPadding: 1.3,
-                                      borderRadius: BorderRadius.circular(4.5),
-                                    ),
-                                    enabledBorder: const OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          color: Color(0xcc9fce4c), width: 1.5),
-                                    ),
-                                    hintStyle: const TextStyle(color: Colors.brown)),
-                                controller: creditController,
-                              ),
-                            ),
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                    minimumSize: const Size(130, 40),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.8)),
-                                    backgroundColor: Colors.deepOrange.shade400),
-                                onPressed: () async {
-                                  setState(() {
-                                    var amount = double.parse(creditController.text);
-                                    if(amount>=10000.00){
-                                      pressed = true;
-                                    }
-                                    else{
-                                      pressed = false;
-                                      inprogress = false;
-                                    }
-
-                                  });
-                                  if(formKey.currentState!.validate()&&pressed){
-                                    setState((){
-                                      inprogress =true;
-                                    });
-                                    var data = await get_data();
-                                  }
-
-                                },
-
-                                child: const Text(
-                                  "Invest",
-                                  style: TextStyle(color: Colors.white,fontSize: 15,fontFamily: "Poppins-Medium"),
-                                ),
-                              ),
-                              inprogress?const Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: CircularProgressIndicator())
-                                  : Container()
-                            ],
-                          ),
-                          SizedBox(height: 10,),
-                          pressed==true?const Text(""):Text("Minimum amount of investment is 10,000 ")
-                        ],
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Center(
+                      child: buildScreenshot(),
+                    ),
+                    SizedBox(
+                      height: 30,
+                    ),
+                    Container(
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                            minimumSize: Size(160, 30),
+                            backgroundColor: Colors.green.shade500,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.5))),
+                        onPressed: () {
+                          print(image);
+                          if (image_url != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => payments(
+                                        phonenumber: widget.phonenumber,
+                                        username: widget.username,
+                                        image: image,
+                                      )),
+                            );
+                          }
+                        },
+                        child: Text(
+                          "Continue",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontFamily: "Poppins-Medium"),
+                        ),
                       ),
                     )
-
                   ],
                 )),
           ],
@@ -191,43 +246,243 @@ class InvestmentState extends State<Investment> {
     );
   }
 
+  build_upi() {
+    return Container(
+        height: 190,
+        child: Column(
+          children: [
+            Row(
+              children: [
+                TextButton(
+                    onPressed: () async {
+                      var value = await LaunchApp.isAppInstalled(
+                        androidPackageName: 'com.phonepe.app',
+                      );
+                      if (value) {
+                        await LaunchApp.openApp(
+                          androidPackageName: 'com.phonepe.app',
+                        );
+                        Navigator.pop(context);
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          "assets/Images/phonepe.png",
+                          width: 80,
+                          height: 35,
+                        ),
+                        Container(
+                            alignment: Alignment.topLeft,
+                            child: Text(
+                              "Phonepe",
+                              style: TextStyle(
+                                  fontFamily: "Poppins-Medium",
+                                  color: Colors.black,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w400),
+                            ))
+                      ],
+                    ))
+              ],
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 9.3),
+              child: Row(
+                children: [
+                  TextButton(
+                      onPressed: () async {
+                        var isAppInstalledResult =
+                            await LaunchApp.isAppInstalled(
+                          androidPackageName:
+                              'com.google.android.apps.nbu.paisa.user',
+                        );
+                        if (isAppInstalledResult) {
+                          await LaunchApp.openApp(
+                            androidPackageName:
+                                'com.google.android.apps.nbu.paisa.user',
+                          );
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            "assets/Images/Googlepay.png",
+                            width: 80,
+                            height: 35,
+                          ),
+                          Container(
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                "Googlepay",
+                                style: TextStyle(
+                                    fontFamily: "Poppins-Medium",
+                                    color: Colors.black,
+                                    fontSize: 20),
+                              ))
+                        ],
+                      ))
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.only(top: 9.3),
+              child: Row(
+                children: [
+                  TextButton(
+                      onPressed: () async {
+                        var appInstalled = await LaunchApp.isAppInstalled(
+                          androidPackageName:
+                              'in.amazon.mShop.android.shopping',
+                        );
+                        if (appInstalled) {
+                          await LaunchApp.openApp(
+                            androidPackageName:
+                                'in.amazon.mShop.android.shopping',
+                          );
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Image.asset(
+                            "assets/Images/pay.png",
+                            width: 80,
+                            height: 50,
+                          ),
+                          Container(
+                              margin: EdgeInsets.only(left: 4.3),
+                              alignment: Alignment.topLeft,
+                              child: Text(
+                                "Amazonpay",
+                                style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: "Poppins-Medium",
+                                    fontSize: 18),
+                              ))
+                        ],
+                      ))
+                ],
+              ),
+            )
+          ],
+        ));
+  }
 
-  Future<String?> get_investments() async {
-    String? remaing_amount;
-    CollectionReference _collectionRef =
-    await FirebaseFirestore.instance.collection('savingsAmount');
-    QuerySnapshot querySnapshot = await _collectionRef.get();
-    for (int i = 0; i < querySnapshot.docs.length; i++) {
-      remaing_amount = querySnapshot.docs[i].get('SavingAmount');
-      return remaing_amount;
+  buildScreenshot() {
+    return Container(
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          image_url != null
+              ? Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                        child: Row(
+                      children: [
+                        Image.file(
+                          image_url!,
+                          width: 180,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                                margin: EdgeInsets.only(left: 12.3),
+                                child: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        image_url = null;
+                                      });
+                                    },
+                                    icon: Icon(Icons.close_outlined))),
+                          ],
+                        )
+                      ],
+                    )),
+                  ],
+                )
+              : Container(
+                  margin: EdgeInsets.only(bottom: 15.3),
+                  child: TextButton(
+                      style: TextButton.styleFrom(
+                          backgroundColor: Colors.purple.shade400),
+                      onPressed: () {
+                        get_permissions();
+                      },
+                      child: Text(
+                        "Upload Screenshot",
+                        style: TextStyle(color: Colors.white),
+                      )),
+                )
+        ],
+      ),
+    );
+  }
+
+  get_permissions() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Gallery'),
+                      onTap: () {
+                        _getFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  _getFromGallery() async {
+    XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        image_url = File(pickedFile.path);
+        image = authentication.movetoinvestements(image_url, widget.username);
+      });
     }
   }
 
-  get_data() async {
-    Map<String, dynamic> data = {
-      "phonenumber": widget.phonenumber,
-      "InvestAmount": creditController.text.toString(),
-      "CreatedAt": DateTime.now(),
-      "status": "pending",
-      "Type":  "Credit",
-      "username":widget.username,
-    };
-    int amount = int.parse(creditController.text);
-    if(amount>=10000){
-      await FirebaseFirestore.instance.collection("requestInvestments").add(data);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => userPannel(
-              phonenumber: widget.phonenumber,
-              pressed: true,
-            )),
-      );
+  _imgFromCamera() async {
+    XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        image_url = File(pickedFile.path);
+        image = authentication.movetoinvestements(image_url, widget.username);
+      });
     }
-
   }
-
-
 }
-
-
