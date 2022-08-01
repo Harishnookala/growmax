@@ -1,13 +1,8 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:growmax/UserScreens/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Forms/personal_details.dart';
@@ -27,7 +22,6 @@ class _LoginPageState extends State<LoginPage> {
   bool error = false;
   User? user;
   SharedPreferences? prefsdata;
-  int? _resendToken;
   String? status;
   var id;
   var mobilenumber;
@@ -71,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
                       padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 20),
                       child: TextField(
                         style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16.6,
                             color: Colors.black,
                             fontFamily: "Poppins-Light"),
                         controller: _mobile,
@@ -99,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                         padding: EdgeInsets.symmetric(horizontal: 60.0, vertical: 20),
                         child: TextField(
                           style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 16,
                               color: Colors.grey.shade600,
                               fontFamily: "Poppins-Medium"),
                           controller: _otp,
@@ -128,10 +122,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ):Container(),
                     GestureDetector(
+
                       onTap: () async {
                          get_data();
-                        UserCredential user = await FirebaseAuth.instance.signInAnonymously() ;
-                        print(user.user!.uid);
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -162,15 +155,15 @@ class _LoginPageState extends State<LoginPage> {
                           errorMessage,
                           style: Theme.of(context)
                               .textTheme
-                              .labelLarge
-                              ?.copyWith(color: Colors.red),
+                              .titleMedium
+                              ?.copyWith(color: Colors.red,fontFamily: "Poppins-Medium"),
                           textAlign: TextAlign.center,
                         )),
 
                      TextButton(
                          style: TextButton.styleFrom(
                            minimumSize: Size(150, 40),
-                           elevation: 1.0,
+                           elevation: 2.0,
                            backgroundColor: Colors.deepOrange.shade600,
                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.3))
                          ),
@@ -183,8 +176,8 @@ class _LoginPageState extends State<LoginPage> {
                          }, child: Text("Signup",style:
                      TextStyle(color: Colors.white,
                          fontFamily: "Poppins-Light",
-                         fontSize: 15,
-                          fontWeight: FontWeight.w600,
+                         fontSize: 16.5,
+                          fontWeight: FontWeight.w900,
                      ),)),
                     Expanded(
                       child: Container(),
@@ -280,7 +273,6 @@ class _LoginPageState extends State<LoginPage> {
            });
          },
          codeSent: (String verificationId, int? resendToken) {
-           print(verificationId);
            setState(() {
              errorMessage =
              "Please enter the OTP sent to your mobile number.";
@@ -349,7 +341,6 @@ class _LoginPageState extends State<LoginPage> {
            var user = userCredential.user!.providerData[0].phoneNumber;
            if(user!=null){
              prefsdata!.setString('phonenumber', _mobile.text);
-              print(prefsdata!.getString("phonenumber"));
              Navigator.of(context).pushReplacement(
                  MaterialPageRoute(
                      builder: (BuildContext context) {
@@ -367,7 +358,6 @@ class _LoginPageState extends State<LoginPage> {
            });
          },
          codeSent: (String verificationId, int? resendToken) {
-           print(verificationId);
            setState(() {
              errorMessage =
              "Please enter the OTP sent to your mobile number.";

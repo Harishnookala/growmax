@@ -1,41 +1,33 @@
 {
   "project_info": {
-    "project_number": "536310023465",
-    "project_id": "growmaxx-df781",
-    "storage_bucket": "growmaxx-df781.appspot.com"
+    "project_number": "453063257944",
+    "project_id": "magzgrowth",
+    "storage_bucket": "magzgrowth.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:536310023465:android:ce6cc6d51d1de380162338",
+        "mobilesdk_app_id": "1:453063257944:android:f8981063bd4363e05c3f2d",
         "android_client_info": {
           "package_name": "com.example.growmax"
         }
       },
       "oauth_client": [
         {
-          "client_id": "536310023465-np539nben6ih646pqtr3rb1ne0nfhqeo.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.growmax",
-            "certificate_hash": "f4dce09dc019db688f05e36fe3c7b16377933b32"
-          }
-        },
-        {
-          "client_id": "536310023465-5uroge0lukkntmc03r42ng2cpqcribhl.apps.googleusercontent.com",
+          "client_id": "453063257944-4c73kh5192c0s48n9mlg62cl4eb8ur0j.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCjXRpZQ-TrTcOmVTQxiG13h0ZrjdrVShk"
+          "current_key": "AIzaSyD52Io7GbeODFeVaUmS44V-9dZQ5p-E8cc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "536310023465-5uroge0lukkntmc03r42ng2cpqcribhl.apps.googleusercontent.com",
+              "client_id": "453063257944-4c73kh5192c0s48n9mlg62cl4eb8ur0j.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

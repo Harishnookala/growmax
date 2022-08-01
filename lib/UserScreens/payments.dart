@@ -22,10 +22,23 @@ class paymentsstate extends State<payments>{
   Widget build(BuildContext context) {
     // TODO: implement build
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         body:   Column(
           children: [
-            SizedBox(height: 60,),
+            SizedBox(height: 30,),
+            Container(
+              
+              alignment:Alignment.topLeft,
+              child: InkWell(
+                onTap: (){
+                  Navigator.pop(context);
+                },
+                child: Icon(Icons.arrow_back_ios_new_outlined,color: Colors.blue,),
+                
+              ),
+              margin: EdgeInsets.only(top:5.6,left: 12.3,bottom: 12.3),
+            ),
             Form(
               key: formKey,
               child: Column(
@@ -153,7 +166,6 @@ class paymentsstate extends State<payments>{
       "image":image
     };
          var value = await FirebaseFirestore.instance.collection("requestInvestments").add(data);
-         print(value.id);
          Navigator.push(
             context,
             MaterialPageRoute(

@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:growmax/Forms/edit_bankdetails.dart';
 import 'package:growmax/repositories/authentication.dart';
  class Banking extends StatefulWidget {

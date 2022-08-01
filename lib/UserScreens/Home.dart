@@ -9,8 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Forms/bank_details.dart';
 import 'Investment.dart';
-import 'package:timer_count_down/timer_count_down.dart';
-import 'package:timer_count_down/timer_controller.dart';
+
 
 class Home extends StatefulWidget {
   String? id;
@@ -47,7 +46,6 @@ class HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.phonenumber);
     return Container(
       child: ListView(
         shrinkWrap: true,
@@ -192,6 +190,7 @@ class HomeState extends State<Home> {
                     future: authentication.bank_inf(widget.phonenumber),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
+
                         var details = snapshot.data;
                         if (details!.get("status") == "Accept") {
                           return Column(
@@ -239,7 +238,10 @@ class HomeState extends State<Home> {
                                 )),
                           );
                         }
-                      }return Container(child: get_data(),);
+                      }else if(!snapshot.hasData){
+
+                        return Container(child: get_data(),);
+                      }return Container();
 
                     })
               ],
@@ -294,24 +296,34 @@ class HomeState extends State<Home> {
     );
   }
   get_data() {
-    return widget.pressed==null?Center(
-      child: TextButton(
-          style: TextButton.styleFrom(
-              padding: const EdgeInsets.all(12.3),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25.3),
-              ),
-              backgroundColor: Colors.green),
-          onPressed: () async {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (BuildContext context) => BankAccount(
-                    phonenumber: widget.phonenumber, id: widget.id)));
-          },
-          child: const Text(
-            " + Add Bank Details",
-            style: TextStyle(
-                color: Colors.white, fontSize: 15, letterSpacing: 0.6),
-          )),
+    return widget.pressed==null?FutureBuilder<DocumentSnapshot?>(
+      future: authentication.bank_inf(widget.phonenumber),
+      builder: (context,snapshot){
+        if(!snapshot.hasData&&snapshot.data==null){
+          return Center(
+            child:TextButton(
+                style: TextButton.styleFrom(
+                    padding: const EdgeInsets.all(12.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25.3),
+                    ),
+                    backgroundColor: Colors.green),
+                onPressed: () async {
+                  var value = await get_results (widget.phonenumber);
+                  if(value!=null){
+                  }
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => BankAccount(
+                          phonenumber: widget.phonenumber, id: widget.id)));
+                },
+                child: const Text(
+                  " + Add Bank Details",
+                  style: TextStyle(
+                      color: Colors.white, fontSize: 15, letterSpacing: 0.6),
+                )),
+          );
+        }return Container();
+      },
     ):Container();
   }
 
@@ -566,6 +578,19 @@ class HomeState extends State<Home> {
         return Center();
       },
     );
+  }
+
+  get_results(String? phonenumber) async{
+    var data  = await FirebaseFirestore.instance.collection("bank_details").get();
+    for(int i =0;i<data.docs.length;i++){
+      if(data.docs[i].exists){
+        if(data.docs[i].get("phonenumber")==phonenumber){
+         return data.docs[i].id;
+        }
+      }else{
+        return null;
+      }
+    }
   }
 
 

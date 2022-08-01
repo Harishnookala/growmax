@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
-import 'package:growmax/UserScreens/withdraw.dart';
 import 'package:growmax/repositories/authentication.dart';
 import 'package:intl/intl.dart';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
@@ -17,7 +16,6 @@ class pending_requests extends StatefulWidget {
 
 class _pending_requestsState extends State<pending_requests> {
   Authentication authentication = Authentication();
-
   var requestinvestments =
       FirebaseFirestore.instance.collection("requestInvestments").snapshots();
   var requestWithdrawls =
@@ -50,10 +48,18 @@ class _pending_requestsState extends State<pending_requests> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 9,),
-                  IconButton(onPressed: (){
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            userPannel(phonenumber: widget.phonenumber,pressed: true,)));
+                  IconButton(onPressed: () async{
+                    var username = await FirebaseFirestore.instance.collection("bank_details").get();
+                    var values = await get_data(widget.phonenumber,username);
+                     if(values==null){
+                       Navigator.of(context).pushReplacement(MaterialPageRoute(
+                           builder: (BuildContext context) =>
+                               userPannel(phonenumber: widget.phonenumber,)));
+                     }else{
+                       Navigator.of(context).pushReplacement(MaterialPageRoute(
+                           builder: (BuildContext context) =>
+                               userPannel(phonenumber: widget.phonenumber,pressed: true,)));
+                     }
                   }, icon: Icon(Icons.arrow_back_ios_new_outlined,size: 20,color: Colors.lightBlueAccent,)),
                   Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
                   Container(
@@ -229,7 +235,6 @@ class _pending_requestsState extends State<pending_requests> {
   }
 
   get_sort(List dates) {
-    List format_dates = [];
     for (int i = 0; i < dates.length; i++) {
       dates.sort(
         (a, b) {
@@ -262,5 +267,21 @@ class _pending_requestsState extends State<pending_requests> {
       }
     }
     return alltransactions;
+  }
+
+  get_data(String? phonenumber, QuerySnapshot<Map<String, dynamic>> username) {
+    for(int i =0;i<username.docs.length;i++){
+      if(username.docs[i].get("phonenumber")==phonenumber){
+        if(username.docs[i].get("username")!=null){
+          return true;
+        }
+        else{
+          return null;
+        }
+      }
+      else{
+        return null;
+      }
+    }
   }
 }

@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
 
@@ -159,7 +157,6 @@ class Authentication {
   }
 
  Future<String?> movetoinvestements(image_url, name) async {
-    print(name);
     if (image_url != null) {
       final ref =
       FirebaseStorage.instance.ref("details/$name").child(name! + ".jpeg");
@@ -178,7 +175,6 @@ class Authentication {
         username = bank_details.docs[i].get("username");
       }
     }
-    print(username);
      return username;
   }
 }

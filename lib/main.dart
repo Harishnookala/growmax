@@ -1,11 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:growmax/Forms/Address.dart';
-import 'package:growmax/Forms/nominee_details.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'Login.dart';
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +10,6 @@ Future<void> main() async{
   SharedPreferences prefs = await SharedPreferences.getInstance();
   SharedPreferences prefsdata = await SharedPreferences.getInstance();
    var value = prefsdata.getBool("bank");
-   print(value);
   var token = prefs.getString('phonenumber');
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,

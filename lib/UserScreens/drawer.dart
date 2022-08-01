@@ -2,11 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:growmax/Login.dart';
 import 'package:growmax/UserScreens/pending_requests.dart';
-import 'package:growmax/UserScreens/shownominee_details.dart';
 import 'package:growmax/repositories/authentication.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Forms/nominee_details.dart';
 
 // ignore: camel_case_types
 class drawer extends StatefulWidget {

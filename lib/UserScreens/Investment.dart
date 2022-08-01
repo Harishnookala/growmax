@@ -216,7 +216,6 @@ class InvestmentState extends State<Investment> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.5))),
                         onPressed: () {
-                          print(image);
                           if (image_url != null) {
                             Navigator.push(
                               context,

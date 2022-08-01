@@ -1,11 +1,8 @@
 import 'package:back_button_interceptor/back_button_interceptor.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:growmax/Custom_widgets/wrappers.dart';
-
-import '../UserScreens/userPannel.dart';
 import 'Pan_details.dart';
 
 class BankAccount extends StatefulWidget {
@@ -45,15 +42,13 @@ class _BankAccountState extends State<BankAccount> {
         body: Container(
           margin: const EdgeInsets.all(12.3),
           child: ListView(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.only(top: 5.3),
              shrinkWrap: true,
             children: [
               Container(
                 alignment: Alignment.topLeft,
                 child: IconButton(onPressed: (){
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          userPannel(phonenumber: widget.phonenumber,)));
+                   Navigator.pop(context);
                 }, icon: const Icon(Icons.arrow_back_ios_new_outlined,color: Colors.deepOrangeAccent,size: 19,)),
               ),
               Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
@@ -213,7 +208,6 @@ class _BankAccountState extends State<BankAccount> {
         inputFormatters: [
           UpperCaseTextFormatter(),
         ],
-        textCapitalization: TextCapitalization.characters,
         style: TextStyle(fontFamily: "Poppins-Light",),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -248,7 +242,7 @@ class _BankAccountState extends State<BankAccount> {
       child: TextButton(
         style: TextButton.styleFrom(
           backgroundColor: Colors.green,
-          minimumSize: Size(170, 48),
+          minimumSize: Size(140, 30),
           elevation: 1.0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
 
@@ -270,7 +264,7 @@ class _BankAccountState extends State<BankAccount> {
         },
         child: Container(
             margin: EdgeInsets.only(left: 5.3,right: 5.3),
-            child: Text("Save & Continue",style: TextStyle(color: Colors.white,
+            child: Text("Continue",style: TextStyle(color: Colors.white,
                 fontSize: 15,
                 fontFamily: "Poppins-Medium"),)),
       ),

@@ -3,10 +3,8 @@ import 'dart:io';
 import 'package:back_button_interceptor/back_button_interceptor.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:growmax/Custom_widgets/wrappers.dart';
 import 'package:growmax/UserScreens/userPannel.dart';
 import 'package:growmax/repositories/authentication.dart';
@@ -36,6 +34,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   File? image_path;
   String? selected_value;
   var name;
+  bool validity = false;
   List proof = ["Aadhar", "Voter", "Driving", "Passport"];
   Authentication authentication = Authentication();
   final formKey = GlobalKey<FormState>();
@@ -64,7 +63,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       home: Scaffold(
         body: ListView(
           shrinkWrap: true,
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.only(top: 8.6),
           physics: const BouncingScrollPhysics(),
           children: [
             const SizedBox(
@@ -114,7 +113,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                       margin: EdgeInsets.only(left: 12.3),
                       child: ListView(
                         shrinkWrap: true,
-                        physics: ScrollPhysics(),
+                        physics: BouncingScrollPhysics(),
                         children: [
                           Container(
                             child: const Text(
@@ -123,7 +122,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                                   fontWeight: FontWeight.w300,
                                   color: Colors.purple,
                                   letterSpacing: 0.6,
-                                  fontFamily: "Poppins-Light"),
+                                  fontFamily: "Poppins"),
                             ),
                             margin: const EdgeInsets.only(bottom: 8.5),
                           ),
@@ -138,18 +137,33 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                                   fontWeight: FontWeight.w300,
                                   color: Colors.purple,
                                   letterSpacing: 0.6,
-                                  fontFamily: "Poppins-Light"),
+                                  fontFamily: "Poppins"),
                             ),
                             margin: const EdgeInsets.only(bottom: 8.5),
                           ),
                           SizedBox(
                             height: 20,
                           ),
+
                           Center(
                             child: buildPanPhoto(),
                           ),
                           SizedBox(
                             height: 20,
+                          ),
+                          Container(
+                            child: const Text(
+                              "Identification Proof : -",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w300,
+                                  color: Colors.purple,
+                                  letterSpacing: 0.6,
+                                  fontFamily: "Poppins"),
+                            ),
+                            margin: const EdgeInsets.only(bottom: 8.5),
+                          ),
+                          SizedBox(
+                            height: 5,
                           ),
                           SizedBox(
                             width: 120,
@@ -166,7 +180,7 @@ class _Pan_deatilsState extends State<Pan_deatils> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              pressed!
+                              pressed == true
                                   ? build_button()
                                   : Center(
                                       child: Row(
@@ -223,15 +237,16 @@ class _Pan_deatilsState extends State<Pan_deatils> {
       child: SizedBox(
         //width: MediaQuery.of(context).size.width / 1.2,
         child: TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           inputFormatters: [UpperCaseTextFormatter()],
-          textCapitalization: TextCapitalization.characters,
           style: const TextStyle(
             fontFamily: "Poppins-Light",
+            letterSpacing: 0.6
           ),
           controller: panNumberController,
           validator: (value) {
             if (value == null || value.isEmpty || value.length != 10) {
-              return 'Please enter Pan number';
+              return 'Please enter Correct Pan number';
             }
             return null;
           },
@@ -598,74 +613,76 @@ class _Pan_deatilsState extends State<Pan_deatils> {
   }
 
   build_button() {
-    return Container(
-      alignment: Alignment.center,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.green,
-          minimumSize: const Size(170, 48),
-          elevation: 1.0,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.6)),
-        ),
-        onPressed: () async {
-          if (image != null && imageurl != null && selected_value != null) {
-            image = await image;
-            imageurl = await imageurl;
-            String? bank_id;
-            String? id = await get_id();
-            bank_id = id;
-            if (id == null) {
-              bank_id = "1000";
-            } else if (id != null) {
-              var bank = int.parse(bank_id!) + 1;
-              bank_id = bank.toString();
-            }
+    return SizedBox(
+      height: MediaQuery.of(context).size.height / 9.80,
+      width: MediaQuery.of(context).size.width / 1.43,
+      child: Container(
+        alignment: Alignment.center,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.green,
+            elevation: 1.0,
+            minimumSize: Size(120, 25),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25.6)),
+          ),
+          onPressed: () async {
             if (formKey.currentState!.validate()) {
-              setState(() {
-                inprogress = true;
-                pressed = false;
-              });
-              Map<String, dynamic> data = {
-                "name": name,
-                "accountnumber": widget.accountnumber,
-                "ifsc": widget.Ifsc,
-                "phonenumber": widget.phonenumber,
-                "pannumber": panNumberController.text,
-                "image": image,
-                "validationproof": imageurl,
-                "proof": selected_value,
-                "status": "pending",
-                "username": null,
-              };
-              pressed = true;
-              var bank_details = await FirebaseFirestore.instance
-                  .collection("bank_details")
-                  .doc(bank_id.toString())
-                  .set(data);
-              prefsdata = await SharedPreferences.getInstance();
-              prefsdata!.setBool("bank", true);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => userPannel(
-                          phonenumber: widget.phonenumber,
-                          bank_id: bank_id,
-                          pressed: pressed,
-                        )),
-              );
+              if (image_path != null && imageFile != null && selected_value != null) {
+                setState(() {
+                  pressed = false;
+                  inprogress = true;
+                });
+                image = await image;
+                imageurl = await imageurl;
+                String? bank_id;
+                String? id = await get_id();
+                bank_id = id;
+                if (id == null) {
+                  bank_id = "1000";
+                } else if (id != null) {
+                  var bank = int.parse(bank_id!) + 1;
+                  bank_id = bank.toString();
+                }
+                Map<String, dynamic> data = {
+                  "name": name,
+                  "accountnumber": widget.accountnumber,
+                  "ifsc": widget.Ifsc,
+                  "phonenumber": widget.phonenumber,
+                  "pannumber": panNumberController.text,
+                  "image": image,
+                  "validationproof": imageurl,
+                  "proof": selected_value,
+                  "status": "pending",
+                  "username": null,
+                };
+                validity = true;
+                await FirebaseFirestore.instance
+                    .collection("bank_details").doc(bank_id.toString()).set(data);
+                prefsdata = await SharedPreferences.getInstance();
+                prefsdata!.setBool("bank", true);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => userPannel(
+                            phonenumber: widget.phonenumber,
+                            bank_id: bank_id,
+                            pressed: validity,
+                          )),
+                );
+              }
             }
-          }
-        },
-        child: Container(
-            margin: EdgeInsets.only(left: 5.3, right: 5.3),
-            child: Text(
-              "Save & Continue",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontFamily: "Poppins-Medium"),
-            )),
+          },
+          child: Container(
+              margin: EdgeInsets.only(left: 5.3, right: 5.3),
+              child: Text(
+                "Save & Continue",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontFamily: "Poppins-Medium"),
+              )),
+        ),
       ),
     );
   }

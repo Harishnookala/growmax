@@ -34,13 +34,12 @@ class _TransactionState extends State<Transaction> {
   var username;
   @override
   Widget build(BuildContext context) {
-    var investAmount;
     return Container(
       margin: EdgeInsets.all(16.3),
       child: ListView(
         padding: EdgeInsets.zero,
          shrinkWrap: true,
-        physics: ScrollPhysics(),
+        physics: BouncingScrollPhysics(),
         children: [
           const SizedBox(
             height: 30,
@@ -242,7 +241,7 @@ class _TransactionState extends State<Transaction> {
                   return ListView.builder(
                         itemCount: transactions!.length,
                         shrinkWrap: true,
-                        physics: ScrollPhysics(),
+                        physics: BouncingScrollPhysics(),
                         itemBuilder: (context, index) {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -321,7 +320,6 @@ class _TransactionState extends State<Transaction> {
   }
 
   get_sort(List dates) {
-    List format_dates = [];
     for (int i = 0; i < dates.length; i++) {
       dates.sort(
         (a, b) {
@@ -345,9 +343,7 @@ class _TransactionState extends State<Transaction> {
       List<QueryDocumentSnapshot<Object?>> userinvestments) {
     List format_dates = [];
     List all_transactions = [];
-    List all_dates = [];
     String symbol;
-    List afterSort = [];
     String? dateformat;
 
     for (int i = 0; i < selected_dates.length; i++) {
@@ -360,7 +356,6 @@ class _TransactionState extends State<Transaction> {
           for(int l =0;l<userinvestments.length;l++){
             DateTime dateTime = userinvestments[l].get("CreatedAt").toDate();
             if(userinvestments[l].get("status")=="Accept"&&dates[j]==dateTime){
-              print(userinvestments[l].id);
               var datetime = DateFormat('dd/MM/yyyy').format(dateTime);
               if(userinvestments[l].get("Type")=="Credit"){
                 symbol ="+";

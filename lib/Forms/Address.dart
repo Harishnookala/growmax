@@ -1,13 +1,18 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../Login.dart';
+import '../repositories/authentication.dart';
 class Address extends StatefulWidget {
   String? firstname;
   String? lastname;
   String? gender;
   String? birth_date;
+  String?phonenumber;
       String? married_status;
   String ?fathername;
       String ?mothername;
@@ -18,34 +23,27 @@ class Address extends StatefulWidget {
     Icons.visibility_off,
     color: Colors.grey,
   );
-   Address({Key? key, this.firstname,this.fathername,this.lastname,this.gender,this.birth_date,this.married_status,this.mothername,this.image }) : super(key: key);
+   Address({Key? key, this.phonenumber,this.firstname,this.fathername,this.lastname,this.gender,this.birth_date,this.married_status,this.mothername,this.image }) : super(key: key);
 
   @override
   _AddressState createState() => _AddressState();
 }
 
 class _AddressState extends State<Address> {
-  TextEditingController mobileController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController reEnterPasswordController = TextEditingController();
+  TextEditingController fatherNameContoller =TextEditingController();
+  TextEditingController motherNameContoller =TextEditingController();
   final formKey = GlobalKey<FormState>();
-
-  bool securedValue = true;
-  bool isChecked = true;
-  Icon fab = const Icon(
-    Icons.visibility_off,
-    color: Colors.grey,
-  );
-  Icon passwordshown = const Icon(
-    Icons.visibility_off,
-    color: Colors.grey,
-  );
+  var image;
+  File?image_url;
+  var profile_image = "profile";
+  final ImagePicker _picker = ImagePicker();
+  Authentication authentication = Authentication();
+  bool pressed =true;
   bool login_success = false;
   bool inProgress = false;
 
-  var image;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -55,14 +53,12 @@ class _AddressState extends State<Address> {
           margin: const EdgeInsets.all(12.3),
           child: Form(
             key: formKey,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                Column(
+                child:Column(
                   children: [
+                    SizedBox(height: 25,),
                     Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
                     Container(
-                      margin: EdgeInsets.only(left: 14.3,top: 5.3,bottom: 5.3),
+                      margin: EdgeInsets.only(left: 14.3,top: 5.3),
                       alignment: Alignment.topLeft,
                       child: const Text("Address & Communication",style: TextStyle(letterSpacing: 0.6,
                           color: Colors.indigoAccent,
@@ -71,119 +67,141 @@ class _AddressState extends State<Address> {
                           fontSize: 16),),
                     ),
                     Divider(height: 1, thickness: 1.5, color: Colors.green.shade400),
-                    Container(
-                      alignment: Alignment.topLeft,
-                      margin: const EdgeInsets.only(left: 16.3,top: 12.3),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 8.5),
-                            child: const Text(
-                              "Mobile number : -",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.deepOrangeAccent,
-                                  fontSize: 15,
-                                  letterSpacing: 0.6,
-                                  fontFamily: "Poppins-Light"),
+                    Expanded(
+                      child: Container(
+                        alignment: Alignment.topLeft,
+                        margin: const EdgeInsets.only(left: 16.3,top: 12.3),
+                        child: ListView(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: BouncingScrollPhysics(),
+                          children: [
+                            const SizedBox(height: 5,),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 8.5),
+                              child: const Text(
+                                "Email : -",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 15,
+                                    letterSpacing: 0.6,
+                                    fontFamily: "Poppins-Light"),
+                              ),
                             ),
-                          ),
-                          build_mobile(),
-                          const SizedBox(height: 5,),
-                          Container(
-                            margin: EdgeInsets.only(bottom: 8.5),
-                            child: const Text(
-                              "Email : -",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.deepOrangeAccent,
-                                  fontSize: 15,
-                                  letterSpacing: 0.6,
-                                  fontFamily: "Poppins-Light"),
+                            build_email(),
+                            SizedBox(height: 5,),
+                            Container(
+                              child: const Text(
+                                "Father Name : -",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 15,
+                                    letterSpacing: 0.6,
+                                    fontFamily: "Poppins-Medium"),
+                              ),
+                              margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                             ),
-                          ),
-                          build_email(),
-                          SizedBox(height: 5,),
-                          Container(
-                            margin: EdgeInsets.only(bottom: 8.5),
-                            child: const Text(
-                              "Address : -",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.deepOrangeAccent,
-                                  fontSize: 15,
-                                  letterSpacing: 0.6,
-                                  fontFamily: "Poppins-Light"),
+                            buildFatherName(),
+                            Container(
+                              child: const Text(
+                                "Mother Name : -",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 15,
+                                    letterSpacing: 0.6,
+                                    fontFamily: "Poppins-Medium"),
+                              ),
+                              margin: EdgeInsets.only(bottom: 8.5,top: 5.6),
                             ),
-                          ),
-                          build_address(),
-                          const SizedBox(height: 10,),
-                         Row(
-                           mainAxisAlignment: MainAxisAlignment.center,
-                           children: [
-                             build_button(),
-                             inProgress?const Padding(
-                                 padding: EdgeInsets.only(left: 10),
-                                 child: CircularProgressIndicator())
-                                     : Container()
-                           ],
-                         )
+                            buildMotherName(),
+                            Container(
+                              margin: EdgeInsets.only(bottom: 8.5),
+                              child: const Text(
+                                "Address : -",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.deepOrangeAccent,
+                                    fontSize: 15,
+                                    letterSpacing: 0.6,
+                                    fontFamily: "Poppins-Light"),
+                              ),
+                            ),
+                            build_address(),
+                            SizedBox(height: 20,),
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 8.5),
+                              child: const Text(
+                                "Profile picture : -",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.deepOrangeAccent,
+                                    letterSpacing: 0.6,
+                                    fontSize: 15,
+                                    fontFamily: "Poppins-Medium"),
+                              ),
+                            ),
+                            Center(child:buildPanPhoto() ,),
+                            SizedBox(height: 10,),
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.center,
+                             children: [
+                               pressed == true
+                                   ? build_button()
+                                   : Center(
+                                 child: Row(
+                                   crossAxisAlignment:
+                                   CrossAxisAlignment.center,
+                                   mainAxisAlignment:
+                                   MainAxisAlignment.center,
+                                   children: [
+                                     Container(
+                                       decoration: BoxDecoration(
+                                           color: Colors.grey,
+                                           borderRadius:
+                                           BorderRadius.circular(
+                                               25.3)),
+                                       child: Center(
+                                           child: Text("Save & Continue",
+                                               style: TextStyle(
+                                                   color: Colors.white,
+                                                   fontSize: 16),
+                                               textAlign:
+                                               TextAlign.center)),
+                                       width: 180,
+                                       height: 40,
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                               inProgress?const Padding(
+                                   padding: EdgeInsets.only(left: 10),
+                                   child: CircularProgressIndicator())
+                                       : Container()
+                             ],
+                           )
 
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ],
-            ),
+
           ),
         ),
       ),
     );
   }
 
-  build_mobile() {
-    return TextFormField(
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-                contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
-                focusedBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
-                ),
-                hintText: "Mobile",
-                labelText: "Mobile number",
-                labelStyle: const TextStyle(color: Color(0xff576630)),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4.5),
-                ),
-                enabledBorder: const OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
-                ),
-                hintStyle: const TextStyle(color: Colors.brown)),
-            controller:mobileController,
-            cursorColor: Colors.orange,
-            style: const TextStyle(color: Colors.deepPurpleAccent),
-            validator: (phone) {
-              bool validate = validatePhone(phone!);
-              if (phone.isEmpty) {
-                return 'Please enter phone';
-              } else if (!validate) {
-                return "Enter a valid phone number";
-              }  else if (phone.length!= 10) {
-                return "Enter 10 numbers";
-              }
-              return null;
-            },
-    );
-  }
 
   build_email() {
     return SizedBox(
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         style: TextStyle(fontFamily: "Poppins-Light",),
         validator: (email){
           if(email==null||email.isEmpty){
@@ -218,6 +236,7 @@ class _AddressState extends State<Address> {
     return SizedBox(
       width: MediaQuery.of(context).size.width/1.2,
       child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         minLines: 1,
         maxLines: 15,
         keyboardType: TextInputType.multiline,
@@ -248,8 +267,166 @@ class _AddressState extends State<Address> {
     );
   }
 
+  buildFatherName() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width/1.2,
+      child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (fathername){
+          if(fathername==null||fathername.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
+        controller: fatherNameContoller,
+        decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
 
-
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
+            ),
+            hintText: "Father Name",
+            labelText: "Father Name",
+            labelStyle: const TextStyle(color: Color(0xff576630)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4.5),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
+            ),
+            hintStyle: const TextStyle(color: Colors.brown)),
+      ),
+    );
+  }
+  buildMotherName() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width/1.2,
+      child: TextFormField(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        style: TextStyle(fontFamily: "Poppins-Light",),
+        validator: (mothername){
+          if(mothername==null||mothername.isEmpty){
+            return "please enter name";
+          }
+          return null;
+        },
+        controller: motherNameContoller,
+        decoration: InputDecoration(
+            contentPadding:  EdgeInsets.symmetric(vertical: 15.0, horizontal: 10.0),
+            focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.tealAccent, width: 1.8),
+            ),
+            hintText: "Mother Name",
+            labelText: "Mother Name",
+            labelStyle: const TextStyle(color: Color(0xff576630)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4.5),
+            ),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xcc9fce4c), width: 1.5),
+            ),
+            hintStyle: const TextStyle(color: Colors.brown)),
+      ),
+    );
+  }
+  buildPanPhoto() {
+    return Container(
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          image_url!=null?Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                  child: Row(
+                    children: [
+                      Image.file(image_url!,width: 180,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                              margin: EdgeInsets.only(left: 12.3),
+                              child: IconButton(onPressed: (){
+                                setState(() {
+                                  image_url=null;
+                                });
+                              }, icon: Icon(Icons.close_outlined))),
+                        ],
+                      )
+                    ],
+                  )),
+            ],
+          ):Container(
+            margin: EdgeInsets.only(bottom: 15.3),
+            child: TextButton(
+                style: TextButton.styleFrom(
+                    minimumSize: Size(140, 30),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.5)),
+                    backgroundColor: Colors.purple.shade400),
+                onPressed: (){
+                  get_permissions();
+                },child: Text("Upload Profile",style: TextStyle(color: Colors.white,fontSize: 16),)),
+          )
+        ],
+      ),
+    );
+  }
+  get_permissions() {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Gallery'),
+                      onTap: () {
+                        _getFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+  _getFromGallery() async {
+    XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        image_url = File(pickedFile.path);
+        image =  authentication.moveToStorage(image_url, widget.firstname,profile_image);
+      });
+    }
+  }
+  _imgFromCamera() async {
+    XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1800,
+      maxHeight: 1800,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        image_url = File(pickedFile.path);
+        image =  authentication.moveToStorage(image_url, widget.firstname,profile_image);
+      });
+    }
+  }
   build_button() {
     return Container(
       margin: EdgeInsets.only(top: 15.3),
@@ -263,21 +440,21 @@ class _AddressState extends State<Address> {
 
         ),
         onPressed: () async{
-
-          image = await widget.image;
-          setState(() {
-           inProgress =true;
-          });
-          if(formKey.currentState!.validate()){
+          if(formKey.currentState!.validate()&&image_url!=null){
+            setState(() {
+              inProgress =true;
+              pressed =false;
+            });
+            image = await image;
             Map<String,dynamic> details ={
               "firstname":widget.firstname,
               "lastname":widget.lastname,
               "gender":widget.gender,
               "dateofbirth":widget.birth_date,
               "status":widget.married_status,
-              "fathername":widget.fathername,
-              "mothername":widget.mothername,
-              "mobilenumber":mobileController.text,
+              "fathername":fatherNameContoller.text,
+              "mothername":motherNameContoller.text,
+              "mobilenumber":widget.phonenumber,
               "email":emailController.text,
               "address":addressController.text,
               "image":image,
@@ -291,7 +468,9 @@ class _AddressState extends State<Address> {
             );
           }
           else{
-            inProgress =false;
+           setState(() {
+             inProgress =false;
+           });
           }
 
         },

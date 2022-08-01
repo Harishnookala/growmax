@@ -18,7 +18,6 @@ class _ProfileState extends State<Profile> {
   Authentication authentication = Authentication();
   @override
   Widget build(BuildContext context) {
-    print(widget.phoneNumber);
     return Container(
       margin: EdgeInsets.all(16.3),
       child: Column(
